@@ -51,6 +51,8 @@ export function OrderSession({ sessionId, onSessionEnd, tuning = false }: Props)
   const [handsVisible, setHandsVisible] = useState(0);
   const [shoulderWidth, setShoulderWidth] = useState<number | null>(null);
   const [heldMs, setHeldMs] = useState(0);
+  const [bodyDetected, setBodyDetected] = useState(false);
+  const [rawDropouts, setRawDropouts] = useState(0);
   const [thresholds, setThresholds] = useState<PresenceThresholds>(DEFAULT_THRESHOLDS);
   const [showOverlay, setShowOverlay] = useState(tuning);
   const [cart, setCart] = useState<Cart | null>(null);
@@ -141,6 +143,8 @@ export function OrderSession({ sessionId, onSessionEnd, tuning = false }: Props)
       setHandsVisible(frame.handsVisible);
       setShoulderWidth(frame.shoulderWidth);
       setHeldMs(frame.heldMs);
+      setBodyDetected(frame.bodyDetected);
+      setRawDropouts(frame.rawDropouts);
       // Only stream landmarks while someone is actually there. Feeding an empty
       // frame to the recogniser all day is wasted CPU and wasted bandwidth.
       if (frame.presence === 'present') sign.send(frame.lm);
@@ -230,6 +234,8 @@ export function OrderSession({ sessionId, onSessionEnd, tuning = false }: Props)
               shoulderWidth={shoulderWidth}
               heldMs={heldMs}
               handsVisible={handsVisible}
+              bodyDetected={bodyDetected}
+              rawDropouts={rawDropouts}
               thresholds={thresholds}
               onChange={updateThresholds}
               showOverlay={showOverlay}

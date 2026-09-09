@@ -7,6 +7,8 @@ type Props = {
   shoulderWidth: number | null;
   heldMs: number;
   handsVisible: number;
+  bodyDetected: boolean;
+  rawDropouts: number;
   thresholds: PresenceThresholds;
   onChange: (next: Partial<PresenceThresholds>) => void;
   showOverlay: boolean;
@@ -31,6 +33,8 @@ export function DetectionPanel({
   shoulderWidth,
   heldMs,
   handsVisible,
+  bodyDetected,
+  rawDropouts,
   thresholds,
   onChange,
   showOverlay,
@@ -65,6 +69,38 @@ export function DetectionPanel({
           />
           Skeleton
         </label>
+      </div>
+
+      {/*
+        Raw model output vs. what we act on.
+
+        This exists to answer "why not just use the model directly?" with
+        evidence instead of assertion. Stand still and watch: the raw row
+        flickers as tracking drops on a turn, a raised hand, or a backlit
+        frame. Every one of those flickers, acted on directly, would be a
+        cleared cart.
+      */}
+      <div className="grid grid-cols-2 gap-3 rounded-xl bg-slate-950 p-3 text-sm">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-slate-500">Raw model</p>
+          <p className={bodyDetected ? 'font-mono text-slate-200' : 'font-mono text-slate-500'}>
+            {bodyDetected ? 'body found' : 'no body'}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">
+            {rawDropouts === 0 ? 'steady' : `${rawDropouts} dropouts / 30s`}
+          </p>
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wider text-slate-500">After gating</p>
+          <p
+            className={
+              presence === 'present' ? 'font-mono text-emerald-400' : 'font-mono text-slate-400'
+            }
+          >
+            {presence}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">what the terminal acts on</p>
+        </div>
       </div>
 
       {/* --- the measurement --- */}

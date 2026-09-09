@@ -29,6 +29,16 @@ export type CapturedFrame = {
   departed: boolean;
   handsVisible: number;
   shoulderWidth: number | null;
+  /**
+   * The RAW model answer: did MediaPipe return a body this frame, at all?
+   *
+   * Exposed next to `presence` so the two can be compared on screen. This is
+   * the honest way to settle "why not just use the model's output directly" --
+   * watch how often the raw signal flickers while the gated one holds steady.
+   */
+  bodyDetected: boolean;
+  /** Raw detected -> not-detected transitions in the last 30 seconds. */
+  rawDropouts: number;
   /** How long the presence state machine has held its current state, in ms. */
   heldMs: number;
   /**
@@ -64,6 +74,10 @@ export class LandmarkEngine {
   private lastTimestamp = -1;
   private presence = new PresenceTracker();
   private running = false;
+
+  /** Timestamps of raw detection dropouts, trimmed to a 30s window. */
+  private dropouts: number[] = [];
+  private lastDetected = false;
 
   /** Live-tunable: the UI writes these while the camera keeps running. */
   setThresholds(next: Partial<PresenceThresholds>): void {
@@ -153,6 +167,15 @@ export class LandmarkEngine {
     const shoulderWidth =
       ls && rs ? Math.hypot(ls.x - rs.x, ls.y - rs.y) : null;
 
+    const bodyDetected = Boolean(poseLm);
+
+    // Record every raw detected -> lost transition, so the UI can show how
+    // unstable the unfiltered signal actually is.
+    const now = performance.now();
+    if (this.lastDetected && !bodyDetected) this.dropouts.push(now);
+    this.lastDetected = bodyDetected;
+    while (this.dropouts.length && now - this.dropouts[0] > 30_000) this.dropouts.shift();
+
     const presence = this.presence.update(shoulderWidth);
 
     return {
@@ -162,6 +185,8 @@ export class LandmarkEngine {
       departed: this.presence.takeDeparture(),
       handsVisible: (left ? 1 : 0) + (right ? 1 : 0),
       shoulderWidth,
+      bodyDetected,
+      rawDropouts: this.dropouts.length,
       heldMs: this.presence.heldFor(),
       overlay: {
         pose: poseLm ?? null,
@@ -173,6 +198,8 @@ export class LandmarkEngine {
 
   stop(): void {
     this.running = false;
+    this.dropouts = [];
+    this.lastDetected = false;
     if (this.raf) cancelAnimationFrame(this.raf);
     this.raf = 0;
     this.lastTimestamp = -1;
