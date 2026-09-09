@@ -1,12 +1,14 @@
 {
   "name": "signorder",
   "private": true,
-  "description": "Accessible ASL ordering kiosk - CMPE 295A",
+  "description": "Accessible ASL ordering terminal - CMPE 295A",
   "scripts": {
-    "dev": "npm --prefix apps/kiosk run dev",
-    "build": "npm --prefix apps/kiosk run build",
-    "test": "npm --prefix apps/kiosk test",
-    "check": "npm --prefix apps/kiosk run check",
-    "setup": "npm --prefix apps/kiosk install && npm --prefix apps/kiosk run setup"
+    "dev": "npm --prefix web run dev",
+    "build": "npm --prefix web run build",
+    "test": "npm --prefix web test",
+    "check": "npm --prefix web run check",
+    "setup": "npm --prefix web install && npm run data:menu && npm --prefix web run setup",
+    "data:nutrition": "node scripts/fetch-nutrition.mjs",
+    "data:menu": "node scripts/fetch-nutrition.mjs && node scripts/build-menu.mjs"
   }
 }

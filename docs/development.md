@@ -1,6 +1,6 @@
 # Running SignOrder locally
 
-Two processes: the Next.js kiosk and the Python ML service. Start both.
+Two processes: the Next.js terminal and the Python ML service. Start both.
 
 ## 1. ML service (sign recognition)
 
@@ -21,10 +21,10 @@ Check it: <http://127.0.0.1:8000/health>
 stub returns **fake** predictions cycling through a demo vocabulary, and the
 service says so in its startup log. It is never a silent fallback.
 
-## 2. Kiosk
+## 2. Terminal
 
 ```bash
-cd apps/kiosk
+cd web
 npm install
 npm run setup      # vendors MediaPipe wasm + models, seeds the menu
 cp .env.example .env.local
@@ -36,7 +36,7 @@ Open <http://localhost:3000> and allow camera access.
 ### The database needs no setup
 
 Storage is [PGlite](https://pglite.dev) - real Postgres compiled to WASM,
-running in-process and writing to `apps/kiosk/.pglite/`. No Docker, no
+running in-process and writing to `web/.pglite/`. No Docker, no
 connection string. Migrations apply automatically on first query.
 
 To start from a clean menu: delete `.pglite/` and run `npm run db:seed`.
@@ -54,8 +54,8 @@ chapter, so keep them interchangeable.
 ## Checks
 
 ```bash
-cd apps/kiosk && npm run check      # feature-spec drift, types, lint
-cd apps/kiosk && npm test           # ordering fixture suite (no LLM needed)
+cd web && npm run check      # feature-spec drift, types, lint
+cd web && npm test           # ordering fixture suite (no LLM needed)
 cd services/ml && ./.venv/Scripts/python.exe -m pytest tests/ -q
 ```
 
@@ -66,7 +66,7 @@ quietly drops.
 
 ## Troubleshooting
 
-**"Sign recognition: offline"** - the ML service is not running. The kiosk
+**"Sign recognition: offline"** - the ML service is not running. The terminal
 retries with backoff and keeps working on speech and touch.
 
 **Camera blocked** - Chrome only grants `getUserMedia` on `localhost` or

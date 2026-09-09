@@ -1,14 +1,14 @@
-# SignOrder — Multimodal Accessible Ordering Kiosk (CMPE 295A)
+# SignOrder — Multimodal Accessible Ordering Terminal (CMPE 295A)
 
 ## Context
 
-**The problem.** Self-service ordering kiosks and drive-thrus are effectively closed to people who
+**The problem.** Self-service ordering terminals and drive-thrus are effectively closed to people who
 communicate in ASL, and voice-only ordering systems are closed to people who are Deaf or
 speech-impaired. Existing translation apps support a narrow set of input types and none of them
 handle a transactional task like ordering, where the system must be *correct about prices*, not just
 fluent. This is the "Assistive Tech (ASL Translation)" scenario the advisor proposed on June 3rd.
 
-**What we're building.** A browser-based kiosk that notices a person is present, greets them in every
+**What we're building.** A browser-based terminal that notices a person is present, greets them in every
 modality at once, and takes a complete food order through ASL, speech, or touch — conversationally,
 with sub-second response, adapting to whichever channel the person actually uses.
 
@@ -40,7 +40,7 @@ added you as a collaborator before Milestone 0. Node v24.14.0, Python 3.14, and 
 ## Architecture
 
 ```
-┌─ Browser (Chrome kiosk) ────────────────────────────────┐
+┌─ Browser (Chrome terminal) ────────────────────────────────┐
 │  MediaPipe Tasks (WASM)                                  │
 │    • Face Detector    → presence trigger                 │
 │    • Hand + Pose      → 543 landmarks @ 30fps            │
@@ -49,7 +49,7 @@ added you as a collaborator before Milestone 0. Node v24.14.0, Python 3.14, and 
 └──────┬───────────────────────────────┬───────────────────┘
        │ WebSocket (landmarks, ~4KB/f) │ HTTP/SSE
        ▼                               ▼
-┌─ FastAPI  services/ml ──┐   ┌─ Next.js  apps/kiosk ──────┐
+┌─ FastAPI  services/ml ──┐   ┌─ Next.js  web ──────┐
 │  /ws/sign  → ASL model  │   │  /api/agent  (AI SDK v6)    │
 │  /recommend → recsys    │   │  tools: search_menu,        │
 │  (ONNX Runtime)         │◄──┤   add_to_cart, get_cart,    │
@@ -73,7 +73,7 @@ there is no train/serve skew.
 ### Why the LLM is not trained on the menu
 
 The menu lives in Postgres and is reached through tool calls. A language model that generates prices
-will eventually invent one, and a kiosk that quotes a wrong price is worse than no kiosk. The LLM
+will eventually invent one, and a terminal that quotes a wrong price is worse than no terminal. The LLM
 handles conversation, disambiguation, and — importantly — **ASL gloss reordering**: recognized signs
 arrive as `WANT / BURGER / TWO / NO / ONION`, which is not English word order. Mapping that to
 `{action: add, item: burger, qty: 2, mods: [-onion]}` is exactly what an LLM is good at, and it is a
@@ -87,7 +87,7 @@ genuine, defensible use of generative AI rather than decoration.
 
 - **Data:** Google Isolated Sign Language Recognition (~100k landmark sequences, 250 signs, 21 Deaf
   signers) + ~30 self-recorded ordering signs (BURGER, FRIES, COMBO, LARGE, SMALL, COMBO, CARD, CASH…).
-  Record with the *same* MediaPipe pipeline the kiosk uses — 4 team members × ~20 takes × 30 signs
+  Record with the *same* MediaPipe pipeline the terminal uses — 4 team members × ~20 takes × 30 signs
   ≈ 2,400 new sequences, which also gives the project an original dataset contribution.
 - **Preprocessing:** keep both hands (42 pts), lips (~40 pts), upper-body pose (~10 pts) — drop the
   other ~450 face landmarks. Resample to T=32 frames. Normalize per frame: center on chest, scale by
@@ -134,7 +134,7 @@ three times. Budget real time for this — it is the most likely thing to make a
 
 ## Accessibility design
 
-**Principle: no "select your disability" screen.** When a person is detected, the kiosk greets them in
+**Principle: no "select your disability" screen.** When a person is detected, the terminal greets them in
 *every* modality simultaneously — speaks the greeting, captions it in large type, and shows the menu —
 then adapts to whichever channel the person actually uses. Making someone declare a disability to a
 machine before it will serve them is slow, and it is the wrong thing to build.
@@ -152,14 +152,14 @@ machine before it will serve them is slow, and it is the wrong thing to build.
 Reset after 5s of absence. Debounce so one person isn't greeted repeatedly.
 
 **Compliance target:** WCAG 2.1 AA — contrast, 44px touch targets, full keyboard nav, ARIA live regions
-for every state change. Cite the DOJ self-service kiosk accessibility rules for framing in the report.
+for every state change. Cite the DOJ self-service terminal accessibility rules for framing in the report.
 
 ---
 
 ## Repository layout
 
 ```
-apps/kiosk/            Next.js 15 + TS + Tailwind + AI SDK v6
+web/            Next.js 15 + TS + Tailwind + AI SDK v6
   app/api/agent/       streaming agent route, tool definitions
   components/          camera, captions, cart, menu
   lib/mediapipe/       landmark capture + presence detection

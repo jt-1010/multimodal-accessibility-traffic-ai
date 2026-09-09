@@ -2,6 +2,9 @@
 data/*
 !data/.gitkeep
 !data/README.md
+# Menu CSVs are versioned inputs, not downloaded artifacts: commit them.
+!data/menu/
+data/menu/fastfood_nutrition.csv
 *.pt
 *.pth
 *.onnx
@@ -43,9 +46,9 @@ Thumbs.db
 !.vscode/extensions.json
 
 # MediaPipe assets, fetched by `npm run setup`
-apps/kiosk/public/models/
-apps/kiosk/public/mediapipe/
-apps/kiosk/.pglite/
+web/public/models/
+web/public/mediapipe/
+web/.pglite/
 
 # AI assistant / editor scratch files - local only
 .claude/
