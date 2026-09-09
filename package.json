@@ -9,6 +9,7 @@
     "check": "npm --prefix web run check",
     "setup": "npm --prefix web install && npm run data:menu && npm --prefix web run setup",
     "data:nutrition": "node scripts/fetch-nutrition.mjs",
-    "data:menu": "node scripts/fetch-nutrition.mjs && node scripts/build-menu.mjs"
+    "data:menu": "node scripts/fetch-nutrition.mjs && node scripts/build-menu.mjs",
+    "data:images": "node scripts/fetch-food-images.mjs"
   }
 }
