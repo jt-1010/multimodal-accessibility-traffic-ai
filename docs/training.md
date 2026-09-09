@@ -45,16 +45,57 @@ That the dataset ships as landmarks rather than video is the reason this
 project is feasible on a free T4 at all. Training on raw video would mean a 3D
 CNN, tens of GPU-hours, and a serving path that cannot hit our latency budget.
 
-**Secondary: ~30 ordering signs we record ourselves.**
+**What the 250 signs actually cover — verified, not assumed.**
 
-GISLR's vocabulary comes from PopSign, a game for parents of Deaf children, so
-it covers `want`, `more`, `please`, `thank you`, `drink`, `eat`, `finish` —
-genuinely useful — but no `BURGER`, `FRIES`, `COMBO`, `LARGE`, `MEDIUM`,
-`CARD`. We record those with `ml/collect`, using the **same MediaPipe pipeline
-the browser uses**, so the new samples are identical in format to GISLR.
+The vocabulary comes from PopSign, a game teaching parents of Deaf toddlers,
+so mealtime words are core to it. Checked against the real label file
+(`data/asl/sign_to_prediction_index_map.json`), **31 of the 250 signs are
+directly useful for ordering**:
 
-4 people × ~20 takes × ~30 signs ≈ **2,400 sequences**. This is also an
+```
+drink, milk, water, food, hungry, thirsty, apple, orange, icecream, frenchfries, pizza, cereal, chocolate, snack, nuts, carrot, fish, taste, finish, please, thankyou, yes, no, give, have, like, hot, all, many, first, wait
+```
+
+`frenchfries`, `pizza`, `icecream`, `milk`, `water`, `drink`, `hungry` and
+`thirsty` are all in there. A large part of an ordering vocabulary comes free.
+
+Notably **absent**, and more surprising than the presences: `eat`, `want`,
+`more`, `cheese`, `bread`, `cup`, `cold`, `help`.
+
+**What we must record ourselves: the counter vocabulary.**
+
+No toddler-directed dataset contains these, and they are unavoidable at a
+till:
+
+```
+BURGER  NUGGET  COMBO  MEAL  LARGE  MEDIUM  SMALL  COFFEE  SODA
+CHEESE  SAUCE   WANT   MORE  EAT    CARD    CASH   HERE    TO-GO
+ONE ... TEN
+```
+
+≈28 signs. We record them with `ml/collect`, using the **same MediaPipe
+pipeline the browser uses**, so the new samples are byte-identical in format
+to GISLR.
+
+4 people × ~20 takes × ~28 signs ≈ **2,200 sequences**. This is also an
 original dataset contribution for the report.
+
+### The class-imbalance trap
+
+GISLR gives ~100,000 samples across 250 classes; we add ~2,200 across ~28.
+That is a **40:1 imbalance**, and a naively trained model learns to almost
+never predict the new classes — guessing a GISLR sign is right far more often.
+You would report 85% overall accuracy and have a system that cannot recognise
+BURGER.
+
+Two fixes, and we do both:
+
+1. **Two-stage training** — pretrain on GISLR, then fine-tune on the union with
+   most of the backbone frozen.
+2. **Class-balanced sampling** — each batch sees our signs as often as theirs.
+
+Report **per-class recall**, never overall accuracy alone. The average hides
+exactly the failure that matters.
 
 > **Ethics note for the report:** none of us is a native signer. Signs we
 > record ourselves will carry non-native production errors. State this as a

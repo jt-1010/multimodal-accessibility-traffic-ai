@@ -54,3 +54,7 @@ web/.pglite/
 .claude/
 CLAUDE.md
 AGENTS.md
+
+# Kaggle downloads: fetched by npm run data:images / data:menu
+data/food-images/
+data/asl/

@@ -12,22 +12,28 @@ change the menu.
 
 ## Photos
 
-48 of 71 items have one, attached by `npm run data:images`. Coverage is uneven
-because the source dataset has ten classes and our menu does not map onto them:
+54 of 71 items have one, attached by `npm run data:images`. **Each item gets
+its own photo** — no two menu items share an image.
+
+But they are **illustrative, not literal**. The dataset labels categories, not
+products, so there is no photograph of a Big Mac in it — only photographs of
+burgers. Every burger on the menu shows a real burger; none of them shows
+*that* burger.
 
 | Category | Photos | Why |
 |---|---|---|
-| burgers | 13/13 | direct `Burger` class |
-| chicken | 17/18 | `Crispy Chicken` / `Sandwich` |
-| sides | 4/5 | `Fries`, `Baked Potato` |
-| desserts | 11/14 | `Donut` stands in |
-| salads | 3/9 | no salad class |
-| drinks | 0/9 | **no drink class at all** |
+| burgers | 15/15 | `Burger` class |
+| chicken | 34/34 | `Crispy Chicken` |
+| sides | 4/5 | `Fries` |
+| salads, drinks, desserts | 0 | no matching class — see below |
 
-The same photo repeats within a category — the classifier cannot tell a Big Mac
-from a Quarter Pounder, so every burger shows the same burger. Photographing
-the drinks, salads and shakes yourselves is the obvious next step, and would
-also give you per-item photos where it matters most.
+Salads and frozen desserts are deliberately left blank. The dataset's nearest
+classes are `Sandwich` and `Donut`, and putting a sandwich photo on a salad or
+a donut on a McFlurry would be a picture of the wrong food. For someone reading
+the image instead of the name, that is worse than no picture at all.
+
+**Photographing the drinks, salads and shakes yourselves is the obvious next
+step** — and would give per-item accuracy where it matters most.
 
 ## What is real and what is not
 

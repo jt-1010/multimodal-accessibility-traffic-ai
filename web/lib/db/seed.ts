@@ -133,7 +133,12 @@ function devServerRunning(port = 3000): Promise<boolean> {
 }
 
 export async function seed({ force = false } = {}) {
-  if (await devServerRunning()) {
+  // Only file-backed databases can be contended. The test suite runs against
+  // an in-memory one, which no other process can see, so the guard must not
+  // fire there -- otherwise a running dev server breaks `npm test`.
+  const fileBacked = process.env.PGLITE_DATA_DIR !== 'memory';
+
+  if (fileBacked && (await devServerRunning())) {
     console.error('\nThe dev server is running on port 3000.');
     console.error('PGlite is single-process: seeding now would be invisible to it, and');
     console.error('any new columns would show up as "column ... does not exist" errors.');

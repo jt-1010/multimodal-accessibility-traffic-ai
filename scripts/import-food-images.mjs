@@ -2,36 +2,32 @@
  * Attach photos to menu items from the Fast Food Classification Dataset (V2).
  *
  *   https://www.kaggle.com/datasets/utkarshsaxenadn/fast-food-classification-dataset
- *   ~20k images, 10 classes:
+ *   ~20k images, CC0, 10 classes:
  *     Baked Potato, Burger, Crispy Chicken, Donut, Fries,
  *     Hot Dog, Pizza, Sandwich, Taco, Taquito
  *
- * WHAT THIS DATASET CAN AND CANNOT DO
+ * WHAT THE PHOTOS ARE
  *
- * It maps an IMAGE to a food CATEGORY. That is genuinely useful here -- it
- * gives every menu item a real photo, which is the one description that needs
- * no shared language.
+ * Illustrative, not literal. The dataset labels categories, not products, so
+ * it has no photograph of a Big Mac -- only photographs of burgers. Each menu
+ * item gets its OWN burger rather than all thirteen sharing one, because a
+ * grid of identical thumbnails is useless for telling items apart, but nobody
+ * should read these as pictures of the specific product.
  *
- * It cannot tell a Big Mac from a Quarter Pounder. Both are "Burger" to it.
- * So photos land per category, not per item, and the class list only overlaps
- * part of our menu: Hot Dog, Pizza, Taco and Taquito are not on a McDonald's
- * menu at all, and our drinks, salads and desserts beyond donuts have no class.
- * Expect roughly half the menu to get a photo from this source.
+ * Assignment is deterministic: items are sorted within their class and dealt
+ * images in order, so re-running produces the same result and diffs stay clean.
  *
- * It also cannot read a customer's request. Requests arrive as ASL glosses or
- * text, never as images, so an image classifier is not in that path.
+ * WHAT THIS DATASET CANNOT DO
+ *
+ * It cannot read a customer's request -- those arrive as ASL glosses or text,
+ * never as images. Understanding requests belongs to the sign classifier and
+ * the LLM, not here.
  *
  * SETUP (needs a Kaggle API token at ~/.kaggle/kaggle.json)
  *
- *   pip install kaggle
- *   kaggle datasets download -d utkarshsaxenadn/fast-food-classification-dataset \
- *     -p data/food-images --unzip
- *   node scripts/import-food-images.mjs
- *   npm --prefix web run db:seed -- --force
- *
- * Pass --limit N to copy more than one photo per class.
+ *   npm run data:images
  */
-import { readdir, mkdir, copyFile, readFile, writeFile, stat } from 'node:fs/promises';
+import { readdir, mkdir, copyFile, readFile, writeFile, stat, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 
@@ -40,20 +36,36 @@ const PUBLIC_DIR = path.join('web', 'public', 'menu-images');
 const MENU_CSV = path.join('data', 'menu', 'menu.csv');
 const EXTRAS_CSV = path.join('data', 'menu', 'extras.csv');
 
-const PER_CLASS = Number(process.argv.find((a) => a.startsWith('--limit='))?.split('=')[1] ?? 1);
+/**
+ * Usable file-size window.
+ *
+ * Both ends matter. Below the floor are thumbnails and corrupt stubs. Above
+ * the ceiling, in a scraped dataset, are mostly promotional posters, logos and
+ * text banners -- graphics with flat colour and lettering compress differently
+ * from photographs, so "biggest file" selects for exactly the images you do
+ * not want. Sorting by size descending picked a poster of a Big Mac box
+ * instead of a burger.
+ */
+const MIN_BYTES = 6_000;
+const MAX_BYTES = 90_000;
 
 /**
  * Dataset class -> the words in our item names that should use that photo.
- * Checked in order, so put the specific ones first: "Crispy Chicken" has to
+ * Checked in order, so the specific ones come first: "Crispy Chicken" has to
  * win over "Sandwich" for a Crispy Chicken Sandwich.
  */
 const CLASS_KEYWORDS = [
-  ['Crispy Chicken', [/crispy chicken/i, /chicken.*(sandwich|filet)/i, /mcchicken/i, /nugget/i]],
-  ['Burger', [/burger/i, /big mac/i, /quarter pounder/i, /mac\b/i]],
+  ['Crispy Chicken', [/crispy chicken/i, /chicken.*(sandwich|filet)/i, /mcchicken/i, /nugget/i, /tender/i]],
+  ['Burger', [/burger/i, /big mac/i, /quarter pounder/i, /\bmac\b/i, /mcdouble/i, /mcrib/i]],
   ['Fries', [/fries/i, /hash brown/i]],
   ['Baked Potato', [/potato/i]],
-  ['Donut', [/donut|doughnut/i, /pie\b/i, /cookie/i]],
-  ['Sandwich', [/sandwich/i, /club/i, /wrap/i]],
+  // Baked goods only. A donut photo on a McFlurry or a sundae is a picture of
+  // the wrong food, and for someone reading the image instead of the name that
+  // is worse than no picture at all.
+  ['Donut', [/donut|doughnut/i, /\bpie\b/i, /cookie/i]],
+  // Deliberately NOT /salad/: the Sandwich class contains sandwiches, and
+  // putting one on a salad would actively mislead.
+  ['Sandwich', [/sandwich/i, /\bclub\b/i, /wrap/i, /filet-o-fish/i]],
   ['Hot Dog', [/hot ?dog/i]],
   ['Pizza', [/pizza/i]],
   ['Taco', [/taco(?!uito)/i]],
@@ -67,7 +79,7 @@ function classFor(itemName) {
   return null;
 }
 
-/** Find a class directory case-insensitively; the zip nests Train/Valid/Test. */
+/** Find class directories case-insensitively; the zip nests Train/Valid/Test. */
 async function findClassDirs(root) {
   const found = new Map();
 
@@ -85,8 +97,14 @@ async function findClassDirs(root) {
       const match = CLASS_KEYWORDS.find(
         ([cls]) => cls.toLowerCase() === e.name.toLowerCase().replace(/_/g, ' '),
       );
-      if (match && !found.has(match[0])) found.set(match[0], full);
-      else await walk(full, depth + 1);
+      // Prefer the directory with the most images (usually Train).
+      if (match) {
+        const count = (await readdir(full)).length;
+        const prev = found.get(match[0]);
+        if (!prev || count > prev.count) found.set(match[0], { dir: full, count });
+      } else {
+        await walk(full, depth + 1);
+      }
     }
   }
 
@@ -102,77 +120,112 @@ function parseCsv(text) {
 
 if (!existsSync(SRC_ROOT)) {
   console.error(`Dataset not found at ${SRC_ROOT}.`);
-  console.error('Download it first — see the comment at the top of this file.');
+  console.error('Run: npm run data:images');
   process.exit(1);
 }
 
 const classDirs = await findClassDirs(SRC_ROOT);
 if (classDirs.size === 0) {
   console.error(`No recognised class folders under ${SRC_ROOT}.`);
-  console.error(`Expected directories named: ${CLASS_KEYWORDS.map(([c]) => c).join(', ')}`);
   process.exit(1);
 }
 console.log(`Found ${classDirs.size} classes: ${[...classDirs.keys()].join(', ')}`);
 
+// --- build a usable image pool per class ---------------------------------
+const pools = new Map();
+for (const [cls, { dir }] of classDirs) {
+  const names = (await readdir(dir)).filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
+  const sized = [];
+  for (const n of names) {
+    const { size } = await stat(path.join(dir, n));
+    if (size >= MIN_BYTES && size <= MAX_BYTES) sized.push({ name: n, size });
+  }
+  // Alphabetical: stable across machines and reruns, and uncorrelated with
+  // content, so we are not selecting for any particular kind of image.
+  sized.sort((a, b) => a.name.localeCompare(b.name));
+  pools.set(cls, { dir, files: sized });
+  console.log(`  ${cls}: ${names.length} images, ${sized.length} usable`);
+}
+
+// --- read the menus, group items by class --------------------------------
+const files = [MENU_CSV, EXTRAS_CSV];
+const parsed = new Map();
+const byClass = new Map();
+
+for (const csvPath of files) {
+  const { header, rows } = parseCsv(await readFile(csvPath, 'utf8'));
+  for (const key of ['image_url', 'image_source']) {
+    if (!header.includes(key)) header.push(key);
+  }
+  const nameIdx = header.indexOf('name');
+  const slugIdx = header.indexOf('slug');
+
+  for (const row of rows) {
+    while (row.length < header.length) row.push('');
+
+    // Clear first, then re-assign below. Without this, an item that matched a
+    // class on a previous run but no longer does keeps a stale URL pointing at
+    // a file this run just deleted -- a broken image on the menu.
+    row[header.indexOf('image_url')] = '';
+    row[header.indexOf('image_source')] = '';
+
+    const cls = classFor(row[nameIdx] ?? '');
+    if (!cls) continue;
+    if (!byClass.has(cls)) byClass.set(cls, []);
+    byClass.get(cls).push({ row, header, slug: row[slugIdx], name: row[nameIdx] });
+  }
+  parsed.set(csvPath, { header, rows });
+}
+
+// --- deal each item its own image ----------------------------------------
+await rm(PUBLIC_DIR, { recursive: true, force: true });
 await mkdir(PUBLIC_DIR, { recursive: true });
 
-// --- copy representative photos ------------------------------------------
-const classImage = new Map();
-for (const [cls, dir] of classDirs) {
-  const files = (await readdir(dir)).filter((f) => /\.(jpe?g|png|webp)$/i.test(f));
-  if (files.length === 0) continue;
+let assigned = 0;
+const unmatched = [];
 
-  const chosen = files.slice(0, PER_CLASS);
-  for (let i = 0; i < chosen.length; i++) {
-    const ext = path.extname(chosen[i]).toLowerCase();
-    const name = `${cls.toLowerCase().replace(/\s+/g, '-')}${i === 0 ? '' : `-${i}`}${ext}`;
-    await copyFile(path.join(dir, chosen[i]), path.join(PUBLIC_DIR, name));
-    if (i === 0) classImage.set(cls, `/menu-images/${name}`);
+for (const [cls, items] of byClass) {
+  const pool = pools.get(cls);
+  if (!pool || pool.files.length === 0) {
+    unmatched.push(...items.map((i) => i.name));
+    continue;
   }
-  const { size } = await stat(path.join(PUBLIC_DIR, path.basename(classImage.get(cls))));
-  console.log(`  ${cls}: ${files.length} available, copied ${chosen.length} (${(size / 1024).toFixed(0)} KB)`);
+
+  // Stable order in, stable images out.
+  items.sort((a, b) => a.slug.localeCompare(b.slug));
+
+  // Spread picks across the whole pool rather than taking a contiguous run --
+  // scraped folders tend to be clustered, so neighbouring files are often near
+  // duplicates of each other.
+  const stride = Math.max(1, Math.floor(pool.files.length / Math.max(1, items.length)));
+
+  for (let i = 0; i < items.length; i++) {
+    const { row, header, slug } = items[i];
+    const pick = pool.files[(i * stride) % pool.files.length];
+    const ext = path.extname(pick.name).toLowerCase();
+    const dest = `${slug}${ext}`;
+
+    await copyFile(path.join(pool.dir, pick.name), path.join(PUBLIC_DIR, dest));
+    row[header.indexOf('image_url')] = `/menu-images/${dest}`;
+    row[header.indexOf('image_source')] = `kaggle-fastfood-v2:${cls}`;
+    assigned++;
+  }
+
+  const reused = Math.max(0, items.length - pool.files.length);
+  console.log(
+    `  ${cls}: ${items.length} items -> ${items.length - reused} distinct photos` +
+      (reused ? ` (${reused} reused, pool exhausted)` : ''),
+  );
 }
 
-// --- write image_url back into the menu CSVs ------------------------------
-let matched = 0;
-let unmatched = [];
-
-for (const csvPath of [MENU_CSV, EXTRAS_CSV]) {
-  const { header, rows } = parseCsv(await readFile(csvPath, 'utf8'));
-
-  let urlIdx = header.indexOf('image_url');
-  let srcIdx = header.indexOf('image_source');
-  if (urlIdx === -1) {
-    header.push('image_url');
-    urlIdx = header.length - 1;
-  }
-  if (srcIdx === -1) {
-    header.push('image_source');
-    srcIdx = header.length - 1;
-  }
-
-  const nameIdx = header.indexOf('name');
-  const out = rows.map((row) => {
-    while (row.length < header.length) row.push('');
-    const cls = classFor(row[nameIdx] ?? '');
-    const url = cls ? classImage.get(cls) : undefined;
-    if (url) {
-      row[urlIdx] = url;
-      row[srcIdx] = `kaggle-fastfood-v2:${cls}`;
-      matched++;
-    } else {
-      unmatched.push(row[nameIdx]);
-    }
-    return row;
-  });
-
-  await writeFile(csvPath, [header.join(','), ...out.map((r) => r.join(','))].join('\n') + '\n');
+for (const [csvPath, { header, rows }] of parsed) {
+  await writeFile(csvPath, [header.join(','), ...rows.map((r) => r.join(','))].join('\n') + '\n');
 }
 
-console.log(`\nMatched ${matched} items to a photo.`);
+console.log(`\nAssigned ${assigned} items a photo of their own.`);
 if (unmatched.length) {
-  console.log(`No photo for ${unmatched.length} items (no matching class in this dataset):`);
-  console.log('  ' + unmatched.slice(0, 12).join(', ') + (unmatched.length > 12 ? ' …' : ''));
-  console.log('  Drinks, salads and shakes have no class here — photograph those yourselves.');
+  console.log(`No class matches ${unmatched.length} items:`);
+  console.log('  ' + unmatched.slice(0, 10).join(', ') + (unmatched.length > 10 ? ' …' : ''));
 }
-console.log('\nNext: npm --prefix web run db:seed -- --force');
+console.log('\nPhotos are illustrative, not photographs of the actual products.');
+console.log('Next: stop the dev server, then npm --prefix web run db:seed -- --force');

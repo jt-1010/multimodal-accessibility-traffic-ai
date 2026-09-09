@@ -1,8 +1,8 @@
 slug,name,category,price_cents,price_source,calories,protein_g,aliases,nutrition_source,image_url,image_source
-fries-small,Small Fries,sides,199,estimated,230,3,fries|side|chips,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
-fries-medium,Medium Fries,sides,279,estimated,340,4,fries|side,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
-fries-large,Large Fries,sides,349,estimated,490,6,fries|side,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
-hash-browns,Hash Browns,sides,199,estimated,150,2,side,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
+fries-small,Small Fries,sides,199,estimated,230,3,fries|side|chips,team-supplied,/menu-images/fries-small.jpeg,kaggle-fastfood-v2:Fries
+fries-medium,Medium Fries,sides,279,estimated,340,4,fries|side,team-supplied,/menu-images/fries-medium.jpeg,kaggle-fastfood-v2:Fries
+fries-large,Large Fries,sides,349,estimated,490,6,fries|side,team-supplied,/menu-images/fries-large.jpeg,kaggle-fastfood-v2:Fries
+hash-browns,Hash Browns,sides,199,estimated,150,2,side,team-supplied,/menu-images/hash-browns.jpeg,kaggle-fastfood-v2:Fries
 apple-slices,Apple Slices,sides,149,estimated,15,0,side|fruit|apple,team-supplied,,
 soda-small,Small Soft Drink,drinks,149,estimated,150,0,drink|soda|coke|pop,team-supplied,,
 soda-medium,Medium Soft Drink,drinks,189,estimated,210,0,drink|soda|coke,team-supplied,,
