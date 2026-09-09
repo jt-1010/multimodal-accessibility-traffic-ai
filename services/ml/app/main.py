@@ -31,6 +31,7 @@ def health() -> dict:
     return {
         "ok": True,
         "sign_model": PREDICTOR.name,
+        "sign_ready": PREDICTOR.ready,
         "recommender": RECOMMENDER.name,
         "feature_length": feature_length(),
         "frames": spec()["frames"],
@@ -48,6 +49,12 @@ async def ws_sign(ws: WebSocket) -> None:
     await ws.accept()
     segmenter = SignSegmenter()
     expected = feature_length()
+
+    # Tell the client up front whether sign recognition can work at all, so the
+    # UI can say "not trained yet" instead of implying it is listening.
+    await ws.send_json(
+        {"type": "status", "model": PREDICTOR.name, "ready": PREDICTOR.ready}
+    )
 
     try:
         while True:
@@ -73,7 +80,11 @@ async def ws_sign(ws: WebSocket) -> None:
             if candidate is None:
                 continue
 
-            label, confidence = PREDICTOR.predict(candidate["window"])
+            prediction = PREDICTOR.predict(candidate["window"])
+            if prediction is None:
+                continue  # no trained model: stay silent rather than invent
+
+            label, confidence = prediction
             if not segmenter.accept(label, confidence):
                 continue
 

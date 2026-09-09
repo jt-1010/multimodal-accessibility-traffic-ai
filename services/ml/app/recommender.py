@@ -60,5 +60,5 @@ def load_recommender() -> Recommender:
         with MATRIX_PATH.open() as f:
             print(f"[recsys] loaded {MATRIX_PATH.name}")
             return CooccurrenceRecommender(json.load(f))
-    print(f"[recsys] no matrix at {MATRIX_PATH}, kiosk will use its rules baseline")
+    print(f"[recsys] no matrix at {MATRIX_PATH}, the app will use its rules baseline")
     return NullRecommender()

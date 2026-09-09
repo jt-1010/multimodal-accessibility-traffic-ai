@@ -11,6 +11,13 @@ export type SignEvent = {
   model: string;
 };
 
+export type SignStatus = {
+  /** Which predictor the service loaded: "onnx", "stub", or "none". */
+  model: string;
+  /** False until a real model is trained. The UI must not imply otherwise. */
+  ready: boolean;
+};
+
 const WS_URL =
   process.env.NEXT_PUBLIC_SIGN_WS_URL ?? 'ws://127.0.0.1:8000/ws/sign';
 
@@ -32,6 +39,7 @@ const WS_URL =
 export function useSignSocket(onSign: (e: SignEvent) => void) {
   const [connected, setConnected] = useState(false);
   const [droppedFrames, setDroppedFrames] = useState(0);
+  const [status, setStatus] = useState<SignStatus>({ model: 'unknown', ready: false });
   const socketRef = useRef<WebSocket | null>(null);
   const onSignRef = useRef(onSign);
   const retryRef = useRef(0);
@@ -65,6 +73,7 @@ export function useSignSocket(onSign: (e: SignEvent) => void) {
         try {
           const data = JSON.parse(ev.data);
           if (data.type === 'sign') onSignRef.current(data as SignEvent);
+          else if (data.type === 'status') setStatus({ model: data.model, ready: data.ready });
           else if (data.type === 'error') console.warn('[sign] service error:', data.message);
         } catch {
           console.warn('[sign] unparseable message', ev.data);
@@ -110,5 +119,5 @@ export function useSignSocket(onSign: (e: SignEvent) => void) {
     if (ws?.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: 'reset' }));
   }, []);
 
-  return { connected, send, reset, droppedFrames };
+  return { connected, send, reset, droppedFrames, status };
 }

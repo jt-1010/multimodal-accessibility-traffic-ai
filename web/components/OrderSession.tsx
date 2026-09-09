@@ -8,6 +8,7 @@ import { DetectionPanel } from './DetectionPanel';
 import { CaptionPanel } from './CaptionPanel';
 import { CartPanel, type Cart } from './CartPanel';
 import { MenuGrid, type MenuItem } from './MenuGrid';
+import { Composer } from './Composer';
 import { useSignSocket, type SignEvent } from '@/lib/sign/useSignSocket';
 import { useGlossBuffer } from '@/lib/interaction/useGlossBuffer';
 import { useSpeech, useSpeechRecognition } from '@/lib/interaction/useSpeech';
@@ -34,15 +35,24 @@ import {
 type Props = {
   sessionId: string;
   onSessionEnd: () => void;
+  /**
+   * Developer tuning instruments, off unless ?tune=1 is in the URL.
+   *
+   * Threshold sliders and landmark readouts are for whoever is calibrating the
+   * camera, not for a customer standing at a counter trying to order lunch.
+   * Putting them in the default view asked a person with a disability to
+   * understand our detection internals before they could buy a burger.
+   */
+  tuning?: boolean;
 };
 
-export function OrderSession({ sessionId, onSessionEnd }: Props) {
+export function OrderSession({ sessionId, onSessionEnd, tuning = false }: Props) {
   const [presence, setPresence] = useState<PresenceState>('absent');
   const [handsVisible, setHandsVisible] = useState(0);
   const [shoulderWidth, setShoulderWidth] = useState<number | null>(null);
   const [heldMs, setHeldMs] = useState(0);
   const [thresholds, setThresholds] = useState<PresenceThresholds>(DEFAULT_THRESHOLDS);
-  const [showOverlay, setShowOverlay] = useState(true);
+  const [showOverlay, setShowOverlay] = useState(tuning);
   const [cart, setCart] = useState<Cart | null>(null);
   const [menu, setMenu] = useState<Record<string, MenuItem[]>>({});
   const [understood, setUnderstood] = useState<string | null>(null);
@@ -196,12 +206,15 @@ export function OrderSession({ sessionId, onSessionEnd }: Props) {
     <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_21rem]">
       {/* ---------------------------------------------------------------
           Main column. The camera leads: this is a system a person stands in
-          front of and signs at, so seeing yourself tracked matters far more
-          than browsing a menu. Touch is the fallback path, not the headline,
-          and it is sized that way.
+          front of and signs at, so seeing yourself tracked matters more than
+          browsing a menu. Touch is a fallback path, not the headline.
          --------------------------------------------------------------- */}
       <div className="space-y-5">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
+        <div
+          className={
+            tuning ? 'grid gap-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]' : ''
+          }
+        >
           <CameraStage
             onFrame={handleFrame}
             onArrive={handleArrive}
@@ -211,16 +224,18 @@ export function OrderSession({ sessionId, onSessionEnd }: Props) {
             showOverlay={showOverlay}
           />
 
-          <DetectionPanel
-            presence={presence}
-            shoulderWidth={shoulderWidth}
-            heldMs={heldMs}
-            handsVisible={handsVisible}
-            thresholds={thresholds}
-            onChange={updateThresholds}
-            showOverlay={showOverlay}
-            onToggleOverlay={setShowOverlay}
-          />
+          {tuning && (
+            <DetectionPanel
+              presence={presence}
+              shoulderWidth={shoulderWidth}
+              heldMs={heldMs}
+              handsVisible={handsVisible}
+              thresholds={thresholds}
+              onChange={updateThresholds}
+              showOverlay={showOverlay}
+              onToggleOverlay={setShowOverlay}
+            />
+          )}
         </div>
 
         <CaptionPanel
@@ -236,16 +251,38 @@ export function OrderSession({ sessionId, onSessionEnd }: Props) {
           </p>
         )}
 
-        {/* --- Input channels --- */}
-        <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-slate-700 bg-slate-900 px-5 py-4">
-          <button
-            type="button"
-            onClick={recognition.listening ? recognition.stop : recognition.start}
-            disabled={!recognition.supported || busy}
-            className="min-h-[3rem] rounded-xl bg-emerald-600 px-6 font-semibold text-white transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300 disabled:opacity-40"
-          >
-            {recognition.listening ? 'Stop listening' : 'Speak'}
-          </button>
+        <Composer
+          onSend={(text) => {
+            setUnderstood(`Typed: ${text}`);
+            send(`[TEXT] ${text}`);
+          }}
+          onSpeak={recognition.start}
+          onStopListening={recognition.stop}
+          listening={recognition.listening}
+          speechSupported={recognition.supported}
+          disabled={busy}
+        />
+
+        {/* --- Channel status. Honest about what does and does not work. --- */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-1 text-sm">
+          <StatusRow
+            label="Sign language"
+            ok={sign.connected && sign.status.ready}
+            okText={lastSign ? `${lastSign.label} · ${lastSign.latencyMs}ms` : 'watching'}
+            badText={sign.connected ? 'model not trained yet' : 'recogniser offline'}
+          />
+          <StatusRow
+            label="Voice in"
+            ok={recognition.supported}
+            okText={recognition.listening ? 'listening' : 'ready'}
+            badText="not available"
+          />
+          <StatusRow
+            label="Voice out"
+            ok={speech.supported && !muted}
+            okText={speech.speaking ? 'speaking' : 'ready'}
+            badText={muted ? 'muted' : 'not available'}
+          />
           <button
             type="button"
             onClick={() => {
@@ -253,31 +290,10 @@ export function OrderSession({ sessionId, onSessionEnd }: Props) {
               speech.cancel();
             }}
             aria-pressed={muted}
-            className="min-h-[3rem] rounded-xl border border-slate-600 px-5 font-semibold text-slate-200 transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+            className="ml-auto rounded-lg border border-slate-700 px-3 py-1.5 text-slate-300 transition hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {muted ? 'Unmute' : 'Mute'}
           </button>
-
-          <div className="ml-auto flex flex-wrap gap-x-5 gap-y-1 text-sm">
-            <StatusRow
-              label="Signs"
-              ok={sign.connected}
-              okText={lastSign ? `${lastSign.label} · ${lastSign.latencyMs}ms` : 'listening'}
-              badText="offline"
-            />
-            <StatusRow
-              label="Voice in"
-              ok={recognition.supported}
-              okText={recognition.listening ? 'listening' : 'ready'}
-              badText="unsupported"
-            />
-            <StatusRow
-              label="Voice out"
-              ok={speech.supported && !muted}
-              okText={speech.speaking ? 'speaking' : 'ready'}
-              badText={muted ? 'muted' : 'unsupported'}
-            />
-          </div>
         </div>
 
         {/* --- Touch fallback: present, but deliberately secondary --- */}
@@ -303,7 +319,6 @@ export function OrderSession({ sessionId, onSessionEnd }: Props) {
     </div>
   );
 }
-
 
 function StatusRow({
   label,

@@ -12,13 +12,24 @@ import { OrderSession } from './OrderSession';
  * the whole subtree - conversation, captions, cart, camera state - in one go.
  * No teardown logic to keep in sync with the state it is meant to clear.
  */
-export function SessionShell({ baseSessionId }: { baseSessionId: string }) {
+export function SessionShell({
+  baseSessionId,
+  tuning = false,
+}: {
+  baseSessionId: string;
+  tuning?: boolean;
+}) {
   const [generation, setGeneration] = useState(0);
   const sessionId = `${baseSessionId}-${generation}`;
 
   const startNewSession = useCallback(() => setGeneration((g) => g + 1), []);
 
   return (
-    <OrderSession key={sessionId} sessionId={sessionId} onSessionEnd={startNewSession} />
+    <OrderSession
+      key={sessionId}
+      sessionId={sessionId}
+      onSessionEnd={startNewSession}
+      tuning={tuning}
+    />
   );
 }

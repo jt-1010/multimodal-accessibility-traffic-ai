@@ -1,6 +1,6 @@
 # What we train, and on what data
 
-Three models are ours. Two things people assume we train, we do not. This
+Four models are ours (one optional). Two things people assume we train, we do not. This
 document is the answer to "what are you actually training?" — put the specifics
 in the report from here.
 
@@ -13,6 +13,7 @@ in the report from here.
 | 1 | ASL sign classifier | **Yes, from scratch** | Google ISLR (~100k sequences) + ~2.4k we record | Colab T4, 2–4h |
 | 2 | Order recommender | **Yes, from scratch** | Instacart (method) + synthetic order log (deployed) | CPU, minutes |
 | 3 | Ordering LLM | **Yes, QLoRA adapter** | ~8k synthetic dialogues we generate | Colab T4, 3–5h |
+| 4 | Food image classifier | **Yes, fine-tuned** | Kaggle Fast Food Classification V2 (20k images) | Colab T4, ~1h |
 | — | MediaPipe pose/hands | No — pretrained, used as-is | — | — |
 | — | The menu | **Never trained.** It is a database table | — | — |
 
@@ -113,7 +114,8 @@ that one.
 ### Export
 
 ONNX → `ml/asl/artifacts/sign_classifier.onnx` + `labels.json`. The service
-picks it up automatically; until then it runs `StubPredictor` and says so.
+picks it up automatically. Until then sign input is INACTIVE and says so -- it
+does not fake predictions. Set `SIGN_STUB=1` only for pipeline debugging.
 
 ---
 
@@ -189,7 +191,7 @@ dialogues become the eval set.
 
 ### Evaluation
 
-The **same 26-scenario fixture suite** in `web/tests/ordering.test.ts`,
+The **same 30-scenario fixture suite** in `web/tests/ordering.test.ts`,
 replayed through each backend:
 
 | | Fine-tuned Qwen2.5-3B | Hosted baseline |
@@ -214,6 +216,68 @@ train on Colab → merge adapter → GGUF Q4_K_M (~2GB) → Ollama on the laptop
 Genuinely self-contained, no API, no network.
 
 ---
+
+## 4. Food image classifier — optional, and narrower than it looks
+
+**Dataset:** [Fast Food Classification V2](https://www.kaggle.com/datasets/utkarshsaxenadn/fast-food-classification-dataset)
+— ~20,000 images, 10 classes: Baked Potato, Burger, Crispy Chicken, Donut,
+Fries, Hot Dog, Pizza, Sandwich, Taco, Taquito.
+
+```bash
+kaggle datasets download -d utkarshsaxenadn/fast-food-classification-dataset   -p data/food-images --unzip
+node scripts/import-food-images.mjs
+npm --prefix web run db:seed -- --force
+```
+
+### Be precise about what it does
+
+This model maps **image → category**. Three consequences worth stating before
+anyone builds on it:
+
+1. **It cannot classify a customer's request.** Requests arrive as ASL glosses
+   or typed text. There is no image in that path, so an image classifier is
+   not part of understanding what someone asked for. That job belongs to the
+   sign classifier (#1) and the LLM (#3).
+2. **It cannot tell a Big Mac from a Quarter Pounder.** Both are `Burger`. So
+   photos attach per category, not per item.
+3. **Its classes only partly overlap our menu.** Hot Dog, Pizza, Taco and
+   Taquito are not on a McDonald's menu; our drinks, salads and shakes have no
+   class here. Expect roughly half the menu to get a photo from this source
+   and to photograph the rest yourselves.
+
+### Where it genuinely earns its place
+
+- **Menu photos.** A picture is the one description needing no shared
+  language — it works for someone who is Deaf, reads little, or does not speak
+  English. This is the real win, and it needs no training at all: just use the
+  images.
+- **Auto-tagging new photos.** Once trained, the classifier assigns a category
+  to any new food photo the team adds, and flags mismatches (a photo filed
+  under Fries that the model reads as Donut). That is a real, checkable job.
+- **A second trained model for the report**, with a clean confusion matrix and
+  an easy transfer-learning story.
+
+### Recipe
+
+Transfer learning, not from scratch: fine-tune EfficientNet-B0 or ResNet-50
+pretrained on ImageNet. Freeze the backbone, train the head 5 epochs, then
+unfreeze the top block at a 10× lower LR. Augment with flips, ±15° rotation
+and colour jitter. Expect >90% top-1 — these classes are visually distinct,
+which is also why this is a modest contribution rather than a headline one.
+
+Report top-1, the confusion matrix, and per-class recall. Split by image, but
+check the dataset for near-duplicate frames first: if the same burger appears
+in train and test, the number is inflated.
+
+### Suggesting the closest thing we do have
+
+Worth separating clearly, because it sounds like the same feature and is not.
+"We do not sell pizza — the closest we have is a Crispy Chicken Sandwich" is a
+**text similarity** problem over menu names, not an image problem. It is
+already implemented in `suggestAlternatives()` in `web/lib/agent/cart.ts`
+using word overlap plus character trigrams, with four tests covering it, and
+it needs no model. If it later proves too crude, the upgrade is sentence
+embeddings over item names — still not images.
 
 ## What we deliberately do not train
 

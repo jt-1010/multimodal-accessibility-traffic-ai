@@ -15,6 +15,13 @@
       "when": 1788980225845,
       "tag": "0001_naive_juggernaut",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788982857236,
+      "tag": "0002_wise_vulcan",
+      "breakpoints": true
     }
   ]
 }

@@ -39,6 +39,17 @@ export const menuItems = pgTable(
      */
     priceSource: text('price_source').notNull().default('estimated'),
     nutritionSource: text('nutrition_source').notNull().default(''),
+    /**
+     * Photo of the item, served from /menu-images.
+     *
+     * Not decoration. A picture is the one description that needs no shared
+     * language: it works for someone who is Deaf, someone who reads little,
+     * someone whose first language is not English, and someone who simply
+     * does not know what a "Taquito" is. Text-only menus quietly assume a
+     * literacy and vocabulary this system should not require.
+     */
+    imageUrl: text('image_url'),
+    imageSource: text('image_source').notNull().default(''),
   },
   (t) => [index('menu_items_category_idx').on(t.category)],
 );

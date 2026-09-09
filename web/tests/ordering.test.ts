@@ -5,6 +5,7 @@ import { eq } from 'drizzle-orm';
 import { seed } from '@/lib/db/seed';
 import {
   addToCart,
+  suggestAlternatives,
   clearCart,
   confirmOrder,
   getCart,
@@ -84,6 +85,45 @@ describe('menu search', () => {
     const results = await searchMenu(fixtures.burger.name);
     assert.equal(results[0].slug, fixtures.burger.slug);
     assert.ok(results[0].score >= (results[1]?.score ?? 0));
+  });
+});
+
+describe('items we do not sell', () => {
+  /**
+   * A bare "we do not have that" is a dead end, and dead ends cost far more
+   * for someone who just spent real effort signing or typing the request.
+   * These assert we always come back with somewhere to go.
+   */
+  it('always suggests something, even for food we do not sell at all', async () => {
+    const suggestions = await suggestAlternatives('sushi platter', 3);
+    assert.ok(suggestions.length > 0, 'must never return an empty suggestion list');
+    assert.ok(suggestions.length <= 3);
+  });
+
+  it('gets from a word we do not stock to the right category', async () => {
+    const suggestions = await suggestAlternatives('cheeseburger deluxe', 3);
+    assert.ok(
+      suggestions.some((s) => s.category === 'burgers'),
+      `expected a burger, got ${suggestions.map((s) => s.name).join(', ')}`,
+    );
+  });
+
+  it('handles a near-miss on an item we do stock', async () => {
+    const suggestions = await suggestAlternatives('chicken sandwhich', 3); // misspelled
+    assert.ok(
+      suggestions.some((s) => s.category === 'chicken'),
+      `expected chicken, got ${suggestions.map((s) => s.name).join(', ')}`,
+    );
+  });
+
+  it('a failed add returns suggestions and leaves the cart untouched', async () => {
+    const s = newSession();
+    const result = await addToCart(s, 'pepperoni pizza');
+
+    assert.equal(result.ok, false);
+    if (result.ok) return;
+    assert.ok(result.suggestions.length > 0, 'a refusal must carry alternatives');
+    assert.equal((await getCart(s)).itemCount, 0);
   });
 });
 

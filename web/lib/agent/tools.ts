@@ -8,6 +8,7 @@ import {
   getCart,
   removeFromCart,
   searchMenu,
+  suggestAlternatives,
 } from './cart';
 import { getRecommendations } from './recommend';
 import { getDb } from '@/lib/db';
@@ -34,6 +35,24 @@ export function buildTools(sessionId: string): ToolSet {
       }),
       execute: async ({ query }) => {
         const results = await searchMenu(query, 5);
+
+        // Never return an empty answer. If we sell nothing like it, say so and
+        // hand back the nearest things we do sell, so the assistant can offer
+        // an alternative in the same breath instead of a flat refusal.
+        if (results.length === 0) {
+          const alternatives = await suggestAlternatives(query, 3);
+          return {
+            count: 0,
+            weDoNotSellThis: true,
+            message: `Nothing on the menu matches "${query}".`,
+            closestWeDoHave: alternatives.map((a) => ({
+              name: a.name,
+              category: a.category,
+              price: formatMoney(a.priceCents),
+            })),
+          };
+        }
+
         return {
           count: results.length,
           items: results.map((r) => ({

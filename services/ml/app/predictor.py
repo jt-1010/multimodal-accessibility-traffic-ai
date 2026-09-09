@@ -13,6 +13,7 @@ same time is how weeks disappear.
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Protocol
 
@@ -25,23 +26,39 @@ LABELS_PATH = ARTIFACT_DIR / "labels.json"
 
 class Predictor(Protocol):
     name: str
+    #: False means this predictor cannot actually recognise signs.
+    ready: bool
 
-    def predict(self, window: np.ndarray) -> tuple[str, float]: ...
+    def predict(self, window: np.ndarray) -> tuple[str, float] | None: ...
+
+
+class NullPredictor:
+    """Recognises nothing, because we have not trained anything yet.
+
+    This is the default until ml/asl exports a model, and it is deliberately
+    silent rather than fake. An earlier version cycled a demo vocabulary so the
+    pipeline could be exercised end to end -- and the result was a screen that
+    appeared to read signs from a person who had not signed anything. Fabricated
+    input is worse than no input: it puts words in the mouth of the exact user
+    this system exists to serve, and it can add items to a real order.
+
+    Set SIGN_STUB=1 to re-enable the fake emitter for pipeline debugging only.
+    """
+
+    name = "none"
+    ready = False
+
+    def predict(self, window: np.ndarray) -> tuple[str, float] | None:
+        return None
 
 
 class StubPredictor:
-    """Cycles a demo vocabulary so the full pipeline can be exercised."""
+    """Cycles a demo vocabulary. Debugging only -- never on by default."""
 
     name = "stub"
+    ready = False
 
-    DEMO_SEQUENCE = [
-        "WANT",
-        "BURGER",
-        "TWO",
-        "FRIES",
-        "DRINK",
-        "FINISH",
-    ]
+    DEMO_SEQUENCE = ["WANT", "BURGER", "TWO", "FRIES", "DRINK", "FINISH"]
 
     def __init__(self) -> None:
         self._i = 0
@@ -49,8 +66,6 @@ class StubPredictor:
     def predict(self, window: np.ndarray) -> tuple[str, float]:
         label = self.DEMO_SEQUENCE[self._i % len(self.DEMO_SEQUENCE)]
         self._i += 1
-        # Deliberately above the segmenter's confidence threshold so the stub
-        # always emits; the real model will not be this generous.
         return label, 0.95
 
 
@@ -58,6 +73,7 @@ class OnnxPredictor:
     """The trained landmark Transformer, exported to ONNX."""
 
     name = "onnx"
+    ready = True
 
     def __init__(self) -> None:
         import onnxruntime as ort  # imported lazily: optional dependency
@@ -93,7 +109,11 @@ def load_predictor() -> Predictor:
             # Never fall back silently. A stub quietly standing in for a model
             # you believe is loaded is a genuinely dangerous failure mode.
             print(f"[sign] FAILED to load {MODEL_PATH}: {exc}")
-            print("[sign] falling back to StubPredictor - predictions are FAKE")
-    else:
-        print(f"[sign] no trained model at {MODEL_PATH}, using StubPredictor")
-    return StubPredictor()
+
+    if os.environ.get("SIGN_STUB") == "1":
+        print("[sign] SIGN_STUB=1 - emitting FAKE signs. Debugging only.")
+        return StubPredictor()
+
+    print(f"[sign] no trained model at {MODEL_PATH}. Sign input is INACTIVE.")
+    print("[sign] train one with ml/asl, or set SIGN_STUB=1 to fake it.")
+    return NullPredictor()

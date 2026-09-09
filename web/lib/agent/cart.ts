@@ -81,6 +81,62 @@ export async function searchMenu(query: string, limit = 5): Promise<MenuMatch[]>
   return scored.slice(0, limit);
 }
 
+/**
+ * Find the closest things we DO sell, for when we sell nothing like it.
+ *
+ * `searchMenu` is deliberately strict -- it returns nothing rather than a bad
+ * guess, because silently adding the wrong item is the worst outcome. But
+ * "we do not have that" on its own is a dead end, and a dead end is far more
+ * costly for someone who has just spent effort signing or typing the request.
+ *
+ * So this always comes back with something. It scores loosely on shared words
+ * and shared character trigrams, which is enough to get from "pizza" to a
+ * sandwich, or "milkshake" to a shake, without any model at all.
+ */
+function trigrams(value: string): Set<string> {
+  const padded = ` ${value.toLowerCase().trim()} `;
+  const out = new Set<string>();
+  for (let i = 0; i < padded.length - 2; i++) out.add(padded.slice(i, i + 3));
+  return out;
+}
+
+function similarity(a: string, b: string): number {
+  const A = trigrams(a);
+  const B = trigrams(b);
+  if (A.size === 0 || B.size === 0) return 0;
+  let shared = 0;
+  for (const g of A) if (B.has(g)) shared++;
+  return shared / Math.max(A.size, B.size); // Jaccard-ish, 0..1
+}
+
+export async function suggestAlternatives(query: string, limit = 3): Promise<MenuMatch[]> {
+  const db = await getDb();
+  const all = await db.select().from(menuItems).where(eq(menuItems.available, true));
+  const q = query.trim().toLowerCase();
+  if (!q || all.length === 0) return [];
+
+  const queryWords = new Set(q.split(/\s+/).filter((w) => w.length > 2));
+
+  return all
+    .map((item) => {
+      const haystack = [item.name, item.category, ...item.aliases].join(' ').toLowerCase();
+
+      // Shared whole words are a stronger signal than character overlap:
+      // "chicken sandwich" -> "Crispy Chicken Sandwich" should win outright.
+      let wordScore = 0;
+      for (const w of queryWords) if (haystack.includes(w)) wordScore += 0.4;
+
+      const charScore = Math.max(
+        similarity(q, item.name),
+        ...item.aliases.map((a) => similarity(q, a)),
+      );
+
+      return { ...item, score: Math.min(1, wordScore + charScore) };
+    })
+    .sort((a, b) => b.score - a.score || a.priceCents - b.priceCents)
+    .slice(0, limit);
+}
+
 export async function findModifiers(names: string[]): Promise<Modifier[]> {
   if (names.length === 0) return [];
   const db = await getDb();
@@ -166,9 +222,14 @@ export async function addToCart(
   const matches = await searchMenu(itemQuery, 5);
 
   // Refuse to guess when the top match is weak. A wrong item added silently is
-  // worse than one clarifying question.
+  // worse than one clarifying question. But never answer with a bare "no" --
+  // come back with the nearest things we actually sell.
   if (matches.length === 0 || matches[0].score < 40) {
-    return { ok: false, reason: 'not_found', suggestions: matches };
+    return {
+      ok: false,
+      reason: 'not_found',
+      suggestions: await suggestAlternatives(itemQuery, 3),
+    };
   }
 
   const item = matches[0];

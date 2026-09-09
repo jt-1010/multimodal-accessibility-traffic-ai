@@ -28,6 +28,8 @@ type MenuRow = {
   protein_g: string;
   aliases: string;
   nutrition_source: string;
+  image_url?: string;
+  image_source?: string;
 };
 
 /** Minimal RFC-4180 parser. Item names contain commas, so quotes must be honoured. */
@@ -130,6 +132,8 @@ export async function seed({ force = false } = {}) {
       aliases: r.aliases ? r.aliases.split('|').filter(Boolean) : [],
       priceSource: r.price_source || 'estimated',
       nutritionSource: r.nutrition_source || '',
+      imageUrl: r.image_url || null,
+      imageSource: r.image_source || '',
     }));
 
   await db.insert(menuItems).values(values);
@@ -144,7 +148,9 @@ export async function seed({ force = false } = {}) {
   );
 
   const estimated = values.filter((v) => v.priceSource === 'estimated').length;
+  const withPhoto = values.filter((v) => v.imageUrl).length;
   console.log(`Seeded ${values.length} menu items and ${MODIFIERS.length} modifiers.`);
+  console.log(`  ${withPhoto}/${values.length} have a photo.`);
   if (estimated > 0) {
     console.log(
       `  ${estimated}/${values.length} prices are ESTIMATED, not observed. ` +

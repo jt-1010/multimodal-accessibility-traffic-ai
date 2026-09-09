@@ -10,6 +10,7 @@ export type MenuItem = {
   category: string;
   priceCents: number;
   calories: number | null;
+  imageUrl: string | null;
 };
 
 type Props = {
@@ -45,11 +46,24 @@ export function MenuGrid({ categories, onPick, disabled }: Props) {
                   onClick={() => onPick(item)}
                   disabled={disabled}
                   // 44px minimum touch target, per WCAG 2.1 AA.
-                  className="flex min-h-[4.25rem] w-full flex-col justify-center rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-left transition hover:border-emerald-500 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex min-h-[4.25rem] w-full items-center gap-3 rounded-xl border border-slate-700 bg-slate-900 p-2 text-left transition hover:border-emerald-500 hover:bg-slate-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  <span className="text-sm font-medium text-slate-100">{item.name}</span>
-                  <span className="text-sm tabular-nums text-emerald-400">
-                    {formatMoney(item.priceCents)}
+                  {item.imageUrl && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={item.imageUrl}
+                      alt=""
+                      aria-hidden="true"
+                      className="h-14 w-14 shrink-0 rounded-lg object-cover"
+                    />
+                  )}
+                  <span className="min-w-0">
+                    <span className="block truncate text-sm font-medium text-slate-100">
+                      {item.name}
+                    </span>
+                    <span className="block text-sm tabular-nums text-emerald-400">
+                      {formatMoney(item.priceCents)}
+                    </span>
                   </span>
                 </button>
               </li>
