@@ -35,7 +35,6 @@ export function useSignSocket(onSign: (e: SignEvent) => void) {
   const socketRef = useRef<WebSocket | null>(null);
   const onSignRef = useRef(onSign);
   const retryRef = useRef(0);
-  const closedByUs = useRef(false);
 
   // Assigned after render, not during it.
   useEffect(() => {
@@ -43,10 +42,16 @@ export function useSignSocket(onSign: (e: SignEvent) => void) {
   });
 
   useEffect(() => {
+    // Scoped to THIS effect run, not to the component. React StrictMode mounts
+    // effects twice in development (mount, clean up, mount again) and a ref
+    // would survive that cleanup -- leaving the flag stuck true so the second
+    // mount never reconnects, and the kiosk reports the recogniser offline
+    // while it is running perfectly.
+    let cancelled = false;
     let reconnectTimer: ReturnType<typeof setTimeout>;
 
     const connect = () => {
-      if (closedByUs.current) return;
+      if (cancelled) return;
 
       const ws = new WebSocket(WS_URL);
       socketRef.current = ws;
@@ -68,7 +73,7 @@ export function useSignSocket(onSign: (e: SignEvent) => void) {
 
       ws.onclose = () => {
         setConnected(false);
-        if (closedByUs.current) return;
+        if (cancelled) return;
         // Back off to 5s. The service is often just not started yet in dev.
         const delay = Math.min(5000, 500 * 2 ** retryRef.current++);
         reconnectTimer = setTimeout(connect, delay);
@@ -80,7 +85,7 @@ export function useSignSocket(onSign: (e: SignEvent) => void) {
     connect();
 
     return () => {
-      closedByUs.current = true;
+      cancelled = true;
       clearTimeout(reconnectTimer);
       socketRef.current?.close();
     };

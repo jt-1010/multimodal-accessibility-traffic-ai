@@ -101,4 +101,8 @@ export async function seed() {
   console.log(`Seeded ${ITEMS.length} menu items and ${MODIFIERS.length} modifiers.`);
 }
 
-seed().then(() => process.exit(0));
+// Only when run directly (`npm run db:seed`), never on import -- the test
+// suite imports `seed` and must control when it runs.
+if (process.argv[1]?.endsWith('seed.ts')) {
+  seed().then(() => process.exit(0));
+}

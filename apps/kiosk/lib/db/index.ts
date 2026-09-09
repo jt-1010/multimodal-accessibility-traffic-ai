@@ -13,7 +13,19 @@ import * as schema from './schema';
  * and every query carry over unchanged; only this file changes.
  */
 
-const DATA_DIR = path.join(process.cwd(), '.pglite');
+/**
+ * Where the database lives. Read lazily, on first connection rather than at
+ * module load, so a caller can still choose before the first query -- which is
+ * what lets the test suite opt into an in-memory database without having to
+ * dynamic-import every module that touches it.
+ *
+ * PGLITE_DATA_DIR=memory gives a throwaway in-process database.
+ */
+function dataDir(): string | undefined {
+  const configured = process.env.PGLITE_DATA_DIR;
+  if (configured === 'memory') return undefined;
+  return configured ?? path.join(process.cwd(), '.pglite');
+}
 
 type Db = ReturnType<typeof drizzle<typeof schema>>;
 
@@ -21,7 +33,8 @@ type Db = ReturnType<typeof drizzle<typeof schema>>;
 const globalForDb = globalThis as unknown as { __signorderDb?: Promise<Db> };
 
 async function create(): Promise<Db> {
-  const client = new PGlite(DATA_DIR);
+  const dir = dataDir();
+  const client = dir ? new PGlite(dir) : new PGlite();
   const db = drizzle(client, { schema });
   await migrate(db, { migrationsFolder: path.join(process.cwd(), 'drizzle') });
   return db;
