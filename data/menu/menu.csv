@@ -1,58 +1,58 @@
-slug,name,category,price_cents,price_source,calories,protein_g,aliases,nutrition_source
-big-mac,Big Mac,burgers,649,estimated,540,25,burger,tidytuesday-2018-09-04:Mcdonalds
-cheeseburger,Cheeseburger,burgers,549,estimated,300,15,burger|cheese,tidytuesday-2018-09-04:Mcdonalds
-double-bacon-smokehouse-burger,Double Bacon Smokehouse Burger,burgers,879,estimated,1130,70,burger|bacon,tidytuesday-2018-09-04:Mcdonalds
-double-cheeseburger,Double Cheeseburger,burgers,599,estimated,430,25,burger|cheese,tidytuesday-2018-09-04:Mcdonalds
-double-quarter-pounder-with-cheese,Double Quarter Pounder® with Cheese,burgers,739,estimated,770,51,burger|cheese,tidytuesday-2018-09-04:Mcdonalds
-garlic-white-cheddar-burger,Garlic White Cheddar Burger,burgers,679,estimated,620,32,burger,tidytuesday-2018-09-04:Mcdonalds
-hamburger,Hamburger,burgers,549,estimated,250,13,burger,tidytuesday-2018-09-04:Mcdonalds
-maple-bacon-dijon-1-4-lb-burger,Maple Bacon Dijon 1/4 lb Burger,burgers,689,estimated,640,37,burger|bacon,tidytuesday-2018-09-04:Mcdonalds
-pico-guacamole-1-4-lb-burger,Pico Guacamole 1/4 lb Burger,burgers,659,estimated,580,29,burger,tidytuesday-2018-09-04:Mcdonalds
-quarter-pounder-with-cheese,Quarter Pounder® with Cheese,burgers,639,estimated,530,31,burger|cheese,tidytuesday-2018-09-04:Mcdonalds
-signature-sriracha-burger,Signature Sriracha Burger,burgers,699,estimated,670,32,burger,tidytuesday-2018-09-04:Mcdonalds
-single-bacon-smokehouse-burger,Single Bacon Smokehouse Burger,burgers,769,estimated,840,46,burger|bacon,tidytuesday-2018-09-04:Mcdonalds
-sweet-bbq-bacon-1-4-lb-burger,Sweet BBQ Bacon 1/4 lb Burger,burgers,709,estimated,690,38,burger|bacon,tidytuesday-2018-09-04:Mcdonalds
-artisan-grilled-chicken-sandwich,Artisan Grilled Chicken Sandwich,chicken,629,estimated,380,37,chicken,tidytuesday-2018-09-04:Mcdonalds
-classic-chicken-sandwich,Classic Chicken Sandwich,chicken,679,estimated,510,25,chicken,tidytuesday-2018-09-04:Mcdonalds
-crispy-bacon-smokehouse-chicken-sandwich,Crispy Bacon Smokehouse Chicken Sandwich,chicken,849,estimated,920,46,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds
-crispy-garlic-white-cheddar-chicken-sandwich,Crispy Garlic White Cheddar Chicken Sandwich,chicken,759,estimated,700,33,chicken,tidytuesday-2018-09-04:Mcdonalds
-crispy-maple-bacon-dijon-chicken-sandwich,Crispy Maple Bacon Dijon Chicken Sandwich,chicken,779,estimated,740,39,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds
-crispy-pico-guacamole-chicken-sandwich,Crispy Pico Guacamole Chicken Sandwich,chicken,749,estimated,680,31,chicken,tidytuesday-2018-09-04:Mcdonalds
-crispy-signature-sriracha-chicken-sandwich,Crispy Signature Sriracha Chicken Sandwich,chicken,769,estimated,730,32,chicken,tidytuesday-2018-09-04:Mcdonalds
-crispy-sweet-bbq-bacon-chicken-sandwich,Crispy Sweet BBQ Bacon Chicken Sandwich,chicken,799,estimated,800,39,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds
-filet-o-fish,Filet-O-Fish®,chicken,629,estimated,380,15,chicken|fish,tidytuesday-2018-09-04:Mcdonalds
-grilled-bacon-smokehouse-chicken-sandwich,Grilled Bacon Smokehouse Chicken Sandwich,chicken,779,estimated,750,55,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds
-grilled-garlic-white-cheddar-chicken-sandwich,Grilled Garlic White Cheddar Chicken Sandwich,chicken,689,estimated,530,42,chicken,tidytuesday-2018-09-04:Mcdonalds
-grilled-maple-bacon-dijon-chicken-sandwich,Grilled Maple Bacon Dijon Chicken Sandwich,chicken,709,estimated,580,48,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds
-grilled-pico-guacamole-chicken-sandwich,Grilled Pico Guacamole Chicken Sandwich,chicken,689,estimated,520,40,chicken,tidytuesday-2018-09-04:Mcdonalds
-grilled-signature-sriracha-chicken-sandwich,Grilled Signature Sriracha Chicken Sandwich,chicken,699,estimated,560,41,chicken,tidytuesday-2018-09-04:Mcdonalds
-grilled-sweet-bbq-bacon-chicken-sandwich,Grilled Sweet BBQ Bacon Chicken Sandwich,chicken,729,estimated,630,48,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds
-mcchicken,McChicken,chicken,619,estimated,350,15,chicken,tidytuesday-2018-09-04:Mcdonalds
-premium-buttermilk-crispy-chicken-deluxe-sandwich,Premium Buttermilk Crispy Chicken Deluxe Sandwich,chicken,709,estimated,570,28,chicken,tidytuesday-2018-09-04:Mcdonalds
-premium-crispy-chicken-deluxe-sandwich,Premium Crispy Chicken Deluxe Sandwich,chicken,689,estimated,530,25,chicken,tidytuesday-2018-09-04:Mcdonalds
-10-piece-buttermilk-crispy-chicken-tenders,10 piece Buttermilk Crispy Chicken Tenders,desserts,609,estimated,1210,94,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-10-piece-chicken-mcnuggets,10 Piece Chicken McNuggets,desserts,309,estimated,440,24,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds
-10-piece-sweet-n-spicy-honey-bbq-glazed-tenders,10 piece Sweet N' Spicy Honey BBQ Glazed Tenders,desserts,649,estimated,1600,97,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-12-piece-buttermilk-crispy-chicken-tenders,12 piece Buttermilk Crispy Chicken Tenders,desserts,649,estimated,1510,115,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-20-piece-buttermilk-crispy-chicken-tenders,20 piece Buttermilk Crispy Chicken Tenders,desserts,649,estimated,2430,186,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-20-piece-chicken-mcnuggets,20 Piece Chicken McNuggets,desserts,489,estimated,890,49,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds
-3-piece-buttermilk-crispy-chicken-tenders,3 piece Buttermilk Crispy Chicken Tenders,desserts,279,estimated,370,28,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-4-piece-buttermilk-crispy-chicken-tenders,4 piece Buttermilk Crispy Chicken Tenders,desserts,319,estimated,480,38,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-4-piece-chicken-mcnuggets,4 Piece Chicken McNuggets,desserts,249,estimated,180,10,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds
-4-piece-sweet-n-spicy-honey-bbq-glazed-tenders,4 piece Sweet N' Spicy Honey BBQ Glazed Tenders,desserts,389,estimated,640,39,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-40-piece-chicken-mcnuggets,40 piece Chicken McNuggets,desserts,649,estimated,1770,98,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds
-6-piece-buttermilk-crispy-chicken-tenders,6 piece Buttermilk Crispy Chicken Tenders,desserts,429,estimated,760,58,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-6-piece-chicken-mcnuggets,6 Piece Chicken McNuggets,desserts,249,estimated,270,15,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds
-6-piece-sweet-n-spicy-honey-bbq-glazed-tenders,6 piece Sweet N' Spicy Honey BBQ Glazed Tenders,desserts,509,estimated,960,58,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds
-lobster-roll,Lobster Roll,other,399,estimated,290,24,,tidytuesday-2018-09-04:Mcdonalds
-mcdouble,McDouble,other,429,estimated,380,23,,tidytuesday-2018-09-04:Mcdonalds
-mcrib,McRib,other,469,estimated,480,25,,tidytuesday-2018-09-04:Mcdonalds
-premium-asian-salad-w-crispy-chicken,Premium Asian Salad w/ Crispy Chicken,salads,629,estimated,490,33,salad,tidytuesday-2018-09-04:Mcdonalds
-premium-asian-salad-w-grilled-chicken,Premium Asian Salad w/ Grilled Chicken,salads,549,estimated,270,31,salad,tidytuesday-2018-09-04:Mcdonalds
-premium-asian-salad-w-o-chicken,Premium Asian Salad w/o Chicken,salads,549,estimated,140,7,salad,tidytuesday-2018-09-04:Mcdonalds
-premium-bacon-ranch-salad-w-crispy-chicken,Premium Bacon Ranch Salad w/ Crispy Chicken,salads,629,estimated,490,33,salad|bacon,tidytuesday-2018-09-04:Mcdonalds
-premium-bacon-ranch-salad-w-grilled-chicken,Premium Bacon Ranch Salad w/ Grilled Chicken,salads,559,estimated,320,42,salad|bacon,tidytuesday-2018-09-04:Mcdonalds
-premium-bacon-ranch-salad-w-o-chicken,Premium Bacon Ranch Salad w/o Chicken,salads,549,estimated,190,14,salad|bacon,tidytuesday-2018-09-04:Mcdonalds
-premium-southwest-salad-w-crispy-chicken,Premium Southwest Salad w/ Crispy Chicken,salads,639,estimated,520,28,salad,tidytuesday-2018-09-04:Mcdonalds
-premium-southwest-salad-w-grilled-chicken,Premium Southwest Salad w/ Grilled Chicken,salads,569,estimated,350,37,salad,tidytuesday-2018-09-04:Mcdonalds
-premium-southwest-salad-w-o-chicken,Premium Southwest Salad w/o Chicken,salads,549,estimated,220,8,salad,tidytuesday-2018-09-04:Mcdonalds
+slug,name,category,price_cents,price_source,calories,protein_g,aliases,nutrition_source,image_url,image_source
+big-mac,Big Mac,burgers,649,estimated,540,25,burger,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+cheeseburger,Cheeseburger,burgers,549,estimated,300,15,burger|cheese,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+double-bacon-smokehouse-burger,Double Bacon Smokehouse Burger,burgers,879,estimated,1130,70,burger|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+double-cheeseburger,Double Cheeseburger,burgers,599,estimated,430,25,burger|cheese,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+double-quarter-pounder-with-cheese,Double Quarter Pounder® with Cheese,burgers,739,estimated,770,51,burger|cheese,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+garlic-white-cheddar-burger,Garlic White Cheddar Burger,burgers,679,estimated,620,32,burger,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+hamburger,Hamburger,burgers,549,estimated,250,13,burger,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+maple-bacon-dijon-1-4-lb-burger,Maple Bacon Dijon 1/4 lb Burger,burgers,689,estimated,640,37,burger|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+pico-guacamole-1-4-lb-burger,Pico Guacamole 1/4 lb Burger,burgers,659,estimated,580,29,burger,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+quarter-pounder-with-cheese,Quarter Pounder® with Cheese,burgers,639,estimated,530,31,burger|cheese,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+signature-sriracha-burger,Signature Sriracha Burger,burgers,699,estimated,670,32,burger,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+single-bacon-smokehouse-burger,Single Bacon Smokehouse Burger,burgers,769,estimated,840,46,burger|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+sweet-bbq-bacon-1-4-lb-burger,Sweet BBQ Bacon 1/4 lb Burger,burgers,709,estimated,690,38,burger|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/burger.jpeg,kaggle-fastfood-v2:Burger
+artisan-grilled-chicken-sandwich,Artisan Grilled Chicken Sandwich,chicken,629,estimated,380,37,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+classic-chicken-sandwich,Classic Chicken Sandwich,chicken,679,estimated,510,25,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+crispy-bacon-smokehouse-chicken-sandwich,Crispy Bacon Smokehouse Chicken Sandwich,chicken,849,estimated,920,46,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+crispy-garlic-white-cheddar-chicken-sandwich,Crispy Garlic White Cheddar Chicken Sandwich,chicken,759,estimated,700,33,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+crispy-maple-bacon-dijon-chicken-sandwich,Crispy Maple Bacon Dijon Chicken Sandwich,chicken,779,estimated,740,39,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+crispy-pico-guacamole-chicken-sandwich,Crispy Pico Guacamole Chicken Sandwich,chicken,749,estimated,680,31,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+crispy-signature-sriracha-chicken-sandwich,Crispy Signature Sriracha Chicken Sandwich,chicken,769,estimated,730,32,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+crispy-sweet-bbq-bacon-chicken-sandwich,Crispy Sweet BBQ Bacon Chicken Sandwich,chicken,799,estimated,800,39,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+filet-o-fish,Filet-O-Fish®,chicken,629,estimated,380,15,chicken|fish,tidytuesday-2018-09-04:Mcdonalds,,
+grilled-bacon-smokehouse-chicken-sandwich,Grilled Bacon Smokehouse Chicken Sandwich,chicken,779,estimated,750,55,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+grilled-garlic-white-cheddar-chicken-sandwich,Grilled Garlic White Cheddar Chicken Sandwich,chicken,689,estimated,530,42,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+grilled-maple-bacon-dijon-chicken-sandwich,Grilled Maple Bacon Dijon Chicken Sandwich,chicken,709,estimated,580,48,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+grilled-pico-guacamole-chicken-sandwich,Grilled Pico Guacamole Chicken Sandwich,chicken,689,estimated,520,40,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+grilled-signature-sriracha-chicken-sandwich,Grilled Signature Sriracha Chicken Sandwich,chicken,699,estimated,560,41,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+grilled-sweet-bbq-bacon-chicken-sandwich,Grilled Sweet BBQ Bacon Chicken Sandwich,chicken,729,estimated,630,48,chicken|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+mcchicken,McChicken,chicken,619,estimated,350,15,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+premium-buttermilk-crispy-chicken-deluxe-sandwich,Premium Buttermilk Crispy Chicken Deluxe Sandwich,chicken,709,estimated,570,28,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+premium-crispy-chicken-deluxe-sandwich,Premium Crispy Chicken Deluxe Sandwich,chicken,689,estimated,530,25,chicken,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+10-piece-buttermilk-crispy-chicken-tenders,10 piece Buttermilk Crispy Chicken Tenders,desserts,609,estimated,1210,94,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+10-piece-chicken-mcnuggets,10 Piece Chicken McNuggets,desserts,309,estimated,440,24,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+10-piece-sweet-n-spicy-honey-bbq-glazed-tenders,10 piece Sweet N' Spicy Honey BBQ Glazed Tenders,desserts,649,estimated,1600,97,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,,
+12-piece-buttermilk-crispy-chicken-tenders,12 piece Buttermilk Crispy Chicken Tenders,desserts,649,estimated,1510,115,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+20-piece-buttermilk-crispy-chicken-tenders,20 piece Buttermilk Crispy Chicken Tenders,desserts,649,estimated,2430,186,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+20-piece-chicken-mcnuggets,20 Piece Chicken McNuggets,desserts,489,estimated,890,49,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+3-piece-buttermilk-crispy-chicken-tenders,3 piece Buttermilk Crispy Chicken Tenders,desserts,279,estimated,370,28,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+4-piece-buttermilk-crispy-chicken-tenders,4 piece Buttermilk Crispy Chicken Tenders,desserts,319,estimated,480,38,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+4-piece-chicken-mcnuggets,4 Piece Chicken McNuggets,desserts,249,estimated,180,10,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+4-piece-sweet-n-spicy-honey-bbq-glazed-tenders,4 piece Sweet N' Spicy Honey BBQ Glazed Tenders,desserts,389,estimated,640,39,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,,
+40-piece-chicken-mcnuggets,40 piece Chicken McNuggets,desserts,649,estimated,1770,98,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+6-piece-buttermilk-crispy-chicken-tenders,6 piece Buttermilk Crispy Chicken Tenders,desserts,429,estimated,760,58,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+6-piece-chicken-mcnuggets,6 Piece Chicken McNuggets,desserts,249,estimated,270,15,dessert|sweet|nugget,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+6-piece-sweet-n-spicy-honey-bbq-glazed-tenders,6 piece Sweet N' Spicy Honey BBQ Glazed Tenders,desserts,509,estimated,960,58,dessert|sweet,tidytuesday-2018-09-04:Mcdonalds,,
+lobster-roll,Lobster Roll,other,399,estimated,290,24,,tidytuesday-2018-09-04:Mcdonalds,,
+mcdouble,McDouble,other,429,estimated,380,23,,tidytuesday-2018-09-04:Mcdonalds,,
+mcrib,McRib,other,469,estimated,480,25,,tidytuesday-2018-09-04:Mcdonalds,,
+premium-asian-salad-w-crispy-chicken,Premium Asian Salad w/ Crispy Chicken,salads,629,estimated,490,33,salad,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+premium-asian-salad-w-grilled-chicken,Premium Asian Salad w/ Grilled Chicken,salads,549,estimated,270,31,salad,tidytuesday-2018-09-04:Mcdonalds,,
+premium-asian-salad-w-o-chicken,Premium Asian Salad w/o Chicken,salads,549,estimated,140,7,salad,tidytuesday-2018-09-04:Mcdonalds,,
+premium-bacon-ranch-salad-w-crispy-chicken,Premium Bacon Ranch Salad w/ Crispy Chicken,salads,629,estimated,490,33,salad|bacon,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+premium-bacon-ranch-salad-w-grilled-chicken,Premium Bacon Ranch Salad w/ Grilled Chicken,salads,559,estimated,320,42,salad|bacon,tidytuesday-2018-09-04:Mcdonalds,,
+premium-bacon-ranch-salad-w-o-chicken,Premium Bacon Ranch Salad w/o Chicken,salads,549,estimated,190,14,salad|bacon,tidytuesday-2018-09-04:Mcdonalds,,
+premium-southwest-salad-w-crispy-chicken,Premium Southwest Salad w/ Crispy Chicken,salads,639,estimated,520,28,salad,tidytuesday-2018-09-04:Mcdonalds,/menu-images/crispy-chicken.jpeg,kaggle-fastfood-v2:Crispy Chicken
+premium-southwest-salad-w-grilled-chicken,Premium Southwest Salad w/ Grilled Chicken,salads,569,estimated,350,37,salad,tidytuesday-2018-09-04:Mcdonalds,,
+premium-southwest-salad-w-o-chicken,Premium Southwest Salad w/o Chicken,salads,549,estimated,220,8,salad,tidytuesday-2018-09-04:Mcdonalds,,

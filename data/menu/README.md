@@ -8,6 +8,26 @@ change the menu.
 | `fastfood_nutrition.csv` | 515 real menu items, 8 US chains, measured nutrition | TidyTuesday 2018-09-04, from the `openintro` R package. CC0. |
 | `menu.csv` | The entrées we serve | Generated from the above by `scripts/build-menu.mjs` |
 | `extras.csv` | Drinks and sides | **Team-supplied.** The source dataset covers entrées only. |
+| `web/public/menu-images/` | Item photos | [Fast Food Classification V2](https://www.kaggle.com/datasets/utkarshsaxenadn/fast-food-classification-dataset), CC0. Per-category, not per-item. |
+
+## Photos
+
+48 of 71 items have one, attached by `npm run data:images`. Coverage is uneven
+because the source dataset has ten classes and our menu does not map onto them:
+
+| Category | Photos | Why |
+|---|---|---|
+| burgers | 13/13 | direct `Burger` class |
+| chicken | 17/18 | `Crispy Chicken` / `Sandwich` |
+| sides | 4/5 | `Fries`, `Baked Potato` |
+| desserts | 11/14 | `Donut` stands in |
+| salads | 3/9 | no salad class |
+| drinks | 0/9 | **no drink class at all** |
+
+The same photo repeats within a category — the classifier cannot tell a Big Mac
+from a Quarter Pounder, so every burger shows the same burger. Photographing
+the drinks, salads and shakes yourselves is the obvious next step, and would
+also give you per-item photos where it matters most.
 
 ## What is real and what is not
 

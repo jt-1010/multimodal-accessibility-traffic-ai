@@ -1,4 +1,5 @@
 import { readFile } from 'node:fs/promises';
+import { createConnection } from 'node:net';
 import path from 'node:path';
 import { getDb } from './index';
 import { menuItems, modifiers } from './schema';
@@ -103,7 +104,43 @@ const MODIFIERS: [string, string, number, string[], string[]][] = [
   ['gluten-free-bun', 'Gluten-Free Bun', 120, ['burgers', 'chicken'], ['gluten free', 'gf bun']],
 ];
 
+/**
+ * PGlite is a single-process database: it loads the data directory into the
+ * process that opens it. Two processes on the same directory do not see each
+ * other's writes, and the second to flush wins.
+ *
+ * So seeding while `npm run dev` is running does not fail loudly -- it appears
+ * to succeed, and then the dev server keeps serving the schema it opened with.
+ * A migration that added a column shows up as `column "image_url" does not
+ * exist` on every request, which looks like a code bug and is not one.
+ *
+ * Cheap check, saves an afternoon.
+ */
+function devServerRunning(port = 3000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = createConnection({ port, host: '127.0.0.1' });
+    socket.setTimeout(400);
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.on('error', () => resolve(false));
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve(false);
+    });
+  });
+}
+
 export async function seed({ force = false } = {}) {
+  if (await devServerRunning()) {
+    console.error('\nThe dev server is running on port 3000.');
+    console.error('PGlite is single-process: seeding now would be invisible to it, and');
+    console.error('any new columns would show up as "column ... does not exist" errors.');
+    console.error('\nStop the dev server, run this again, then restart it.\n');
+    process.exit(1);
+  }
+
   const db = await getDb();
 
   const existing = await db.select().from(menuItems).limit(1);

@@ -1,15 +1,15 @@
-slug,name,category,price_cents,price_source,calories,protein_g,aliases,nutrition_source
-fries-small,Small Fries,sides,199,estimated,230,3,fries|side|chips,team-supplied
-fries-medium,Medium Fries,sides,279,estimated,340,4,fries|side,team-supplied
-fries-large,Large Fries,sides,349,estimated,490,6,fries|side,team-supplied
-hash-browns,Hash Browns,sides,199,estimated,150,2,side,team-supplied
-apple-slices,Apple Slices,sides,149,estimated,15,0,side|fruit|apple,team-supplied
-soda-small,Small Soft Drink,drinks,149,estimated,150,0,drink|soda|coke|pop,team-supplied
-soda-medium,Medium Soft Drink,drinks,189,estimated,210,0,drink|soda|coke,team-supplied
-soda-large,Large Soft Drink,drinks,229,estimated,300,0,drink|soda|coke,team-supplied
-water,Bottled Water,drinks,179,estimated,0,0,drink|water,team-supplied
-milk,Milk,drinks,169,estimated,100,8,drink|milk,team-supplied
-chocolate-milk,Chocolate Milk,drinks,189,estimated,160,8,drink|milk|chocolate,team-supplied
-orange-juice,Orange Juice,drinks,239,estimated,150,2,drink|juice|orange,team-supplied
-coffee,Coffee,drinks,179,estimated,5,0,drink|coffee,team-supplied
-iced-coffee,Iced Coffee,drinks,249,estimated,90,1,drink|coffee,team-supplied
+slug,name,category,price_cents,price_source,calories,protein_g,aliases,nutrition_source,image_url,image_source
+fries-small,Small Fries,sides,199,estimated,230,3,fries|side|chips,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
+fries-medium,Medium Fries,sides,279,estimated,340,4,fries|side,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
+fries-large,Large Fries,sides,349,estimated,490,6,fries|side,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
+hash-browns,Hash Browns,sides,199,estimated,150,2,side,team-supplied,/menu-images/fries.jpeg,kaggle-fastfood-v2:Fries
+apple-slices,Apple Slices,sides,149,estimated,15,0,side|fruit|apple,team-supplied,,
+soda-small,Small Soft Drink,drinks,149,estimated,150,0,drink|soda|coke|pop,team-supplied,,
+soda-medium,Medium Soft Drink,drinks,189,estimated,210,0,drink|soda|coke,team-supplied,,
+soda-large,Large Soft Drink,drinks,229,estimated,300,0,drink|soda|coke,team-supplied,,
+water,Bottled Water,drinks,179,estimated,0,0,drink|water,team-supplied,,
+milk,Milk,drinks,169,estimated,100,8,drink|milk,team-supplied,,
+chocolate-milk,Chocolate Milk,drinks,189,estimated,160,8,drink|milk|chocolate,team-supplied,,
+orange-juice,Orange Juice,drinks,239,estimated,150,2,drink|juice|orange,team-supplied,,
+coffee,Coffee,drinks,179,estimated,5,0,drink|coffee,team-supplied,,
+iced-coffee,Iced Coffee,drinks,249,estimated,90,1,drink|coffee,team-supplied,,

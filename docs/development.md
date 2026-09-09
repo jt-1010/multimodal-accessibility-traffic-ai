@@ -72,5 +72,11 @@ retries with backoff and keeps working on speech and touch.
 **Camera blocked** - Chrome only grants `getUserMedia` on `localhost` or
 HTTPS. `http://192.168.x.x:3000` will not work.
 
+**`column "..." does not exist` on every request** — you seeded or migrated
+while `npm run dev` was running. PGlite is single-process: the dev server
+opened the database with the old schema and cannot see the new one. Stop the
+dev server, re-run the seed, restart. `npm run db:seed` now refuses to run
+while port 3000 is listening, so this should not recur.
+
 **No response from the assistant** - check `LLM_BACKEND` and its credentials.
 The agent route logs `[agent] backend=... 412ms` for every turn.
