@@ -1,0 +1,19 @@
+@import 'tailwindcss';
+
+/* Respect the OS setting. Vestibular disorders make large motion genuinely
+   unpleasant, and a kiosk animating at someone is not worth that cost. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Visible focus everywhere: the kiosk must be fully keyboard-operable. */
+:focus-visible {
+  outline: 3px solid #34d399;
+  outline-offset: 2px;
+}

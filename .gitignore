@@ -1,0 +1,53 @@
+# --- Data & model weights: never commit. Use the download/export scripts. ---
+data/*
+!data/.gitkeep
+!data/README.md
+*.pt
+*.pth
+*.onnx
+*.gguf
+*.tflite
+*.safetensors
+checkpoints/
+runs/
+wandb/
+
+# --- Node ---
+node_modules/
+.next/
+out/
+build/
+dist/
+*.tsbuildinfo
+.vercel
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# --- Env & secrets ---
+.env
+.env*.local
+!.env.example
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# MediaPipe assets, fetched by `npm run setup`
+apps/kiosk/public/models/
+apps/kiosk/public/mediapipe/
+apps/kiosk/.pglite/
+
+# AI assistant / editor scratch files - local only
+.claude/
+CLAUDE.md
+AGENTS.md

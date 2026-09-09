@@ -1,0 +1,106 @@
+"""Turning a continuous landmark stream into discrete sign events.
+
+This is the hard part, and it is worth being explicit about why.
+
+The classifier answers "which sign is this 32-frame clip?". A person signing
+at a kiosk does not produce clips - they produce an unbroken stream with no
+markers for where one sign ends and the next begins. Everything below exists
+to find those boundaries:
+
+  motion gate   Hands resting in the lap still produce landmarks, and a
+                classifier handed still hands will confidently return
+                whichever sign happens to look most like stillness. We only
+                classify when the wrists are actually moving.
+
+  sliding window  We re-classify every `stride` frames rather than waiting for
+                a clip to end, so the first prediction lands mid-sign instead
+                of after it.
+
+  debounce      One sign spans many overlapping windows, so a naive loop emits
+                the same sign five times in a row. Debouncing is the
+                difference between "MORE" and "MORE MORE MORE MORE".
+"""
+
+from __future__ import annotations
+
+from collections import deque
+
+import numpy as np
+
+from .features import normalize_frame, resample, spec
+
+
+class SignSegmenter:
+    def __init__(self) -> None:
+        s = spec()["segmentation"]
+        self.window_frames: int = s["window_frames"]
+        self.stride: int = s["stride_frames"]
+        self.motion_threshold: float = s["motion_gate_threshold"]
+        self.confidence_threshold: float = s["confidence_threshold"]
+        self.debounce_frames: int = s["debounce_frames"]
+
+        self.target_frames: int = spec()["frames"]
+        self.pose_names: list[str] = spec()["pose_index_names"]
+        self.n_hand: int = spec()["hands"]["count"] * spec()["hands"]["points_per_hand"]
+        self.dims: int = spec()["dims"]
+
+        self.buffer: deque[np.ndarray] = deque(maxlen=self.window_frames)
+        self.frames_seen = 0
+        self.frames_since_emit = 10**9
+        self.last_label: str | None = None
+
+    def _wrist_motion(self) -> float:
+        """Mean frame-to-frame wrist displacement, in shoulder-width units.
+
+        Wrists rather than fingers: finger landmarks jitter constantly from
+        tracking noise even when the hand is still, so they would keep the gate
+        permanently open.
+        """
+        if len(self.buffer) < 2:
+            return 0.0
+
+        lw = self.pose_names.index("left_wrist")
+        rw = self.pose_names.index("right_wrist")
+        idx = [self.n_hand + lw, self.n_hand + rw]
+
+        pts = np.stack([f.reshape(-1, self.dims)[idx] for f in self.buffer])
+        deltas = np.linalg.norm(np.diff(pts, axis=0), axis=-1)
+        return float(deltas.mean())
+
+    def push(self, raw_frame: list[float]) -> dict | None:
+        """Feed one frame. Returns a sign event, or None."""
+        vec = normalize_frame(np.asarray(raw_frame, dtype=np.float32))
+        self.buffer.append(vec)
+        self.frames_seen += 1
+        self.frames_since_emit += 1
+
+        if len(self.buffer) < self.window_frames:
+            return None
+        if self.frames_seen % self.stride != 0:
+            return None
+
+        motion = self._wrist_motion()
+        if motion < self.motion_threshold:
+            # Hands are at rest. Treat this as a phrase boundary so the next
+            # real sign is never suppressed by the debounce.
+            self.last_label = None
+            return None
+
+        window = resample(np.stack(self.buffer), self.target_frames)
+        return {"window": window, "motion": motion}
+
+    def accept(self, label: str, confidence: float) -> bool:
+        """Decide whether a prediction should actually be emitted."""
+        if confidence < self.confidence_threshold:
+            return False
+        if label == self.last_label and self.frames_since_emit < self.debounce_frames:
+            return False
+        self.last_label = label
+        self.frames_since_emit = 0
+        return True
+
+    def reset(self) -> None:
+        self.buffer.clear()
+        self.frames_seen = 0
+        self.frames_since_emit = 10**9
+        self.last_label = None

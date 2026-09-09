@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "description": "Canonical landmark feature definition. The browser, the training pipeline, and the inference service all derive their feature vector from this file. If these numbers drift apart, the model silently sees different inputs in training and production and accuracy collapses for reasons that are very hard to find.",
+  "frames": 32,
+  "fps_target": 30,
+  "hands": {
+    "count": 2,
+    "points_per_hand": 21,
+    "note": "MediaPipe HandLandmarker order: wrist, then thumb->pinky, 4 joints each."
+  },
+  "pose_indices": [0, 11, 12, 13, 14, 15, 16, 23, 24],
+  "pose_index_names": [
+    "nose",
+    "left_shoulder",
+    "right_shoulder",
+    "left_elbow",
+    "right_elbow",
+    "left_wrist",
+    "right_wrist",
+    "left_hip",
+    "right_hip"
+  ],
+  "dims": 3,
+  "feature_length": 153,
+  "normalization": {
+    "center_on": "shoulder_midpoint",
+    "scale_by": "shoulder_width",
+    "note": "Per frame, translate so the shoulder midpoint is the origin and divide by shoulder width. Makes the model invariant to where the person stands and how tall they are."
+  },
+  "segmentation": {
+    "window_frames": 32,
+    "stride_frames": 4,
+    "motion_gate_threshold": 0.012,
+    "confidence_threshold": 0.6,
+    "debounce_frames": 24,
+    "note": "motion_gate_threshold is mean per-frame wrist displacement in shoulder-width units."
+  }
+}
