@@ -66,51 +66,37 @@ Useful if we ever want to re-extract landmarks with different settings, or
 train on raw video. Their baseline LSTM gets **82.1%** on the 250 signs, which
 is a fair target for our own model.
 
-### ASL Citizen — checked, and it changes the plan
+### ASL Citizen — downloaded and verified
 
-**Result: 93% of our ordering vocabulary needs no recording by us.**
+46 GB, byte-complete, valid zip: **83,400 videos, 2,731 signs, 52 signers**.
+Its split CSVs carry `Participant ID, Video file, Gloss, ASL-LEX Code` — the
+last column confirming the vocabulary is ASL-LEX derived.
 
-Run `python ml/asl/vocabulary.py` to reproduce. Of 62 ordering concepts:
+Clips per sign: min 21, median 31, max 45.
+
+**Verified against the real gloss list — 93% of our ordering vocabulary needs
+no recording by us.** Reproduce with `python ml/asl/vocabulary.py`:
 
 | | Count | Source |
 |---|---|---|
-| Already in GISLR | 17 | downloaded, nothing to do |
-| In ASL-LEX (so very likely ASL Citizen) | 41 | request the dataset |
+| Already in GISLR | 17 | downloaded |
+| In ASL Citizen | 41 | downloaded |
 | **Must record ourselves** | **4** | CHICKEN, NUGGET, FIVE, TEN |
 
-`BURGER` is in there as `hamburger`, along with `coffee`, `soda`, `cheese`,
-`want`, `more`, `eat`, `order`, `pay`, `large` (as `big`), `small`, and eight
-of the ten digits.
+`BURGER` is present as `hamburger`, plus `coffee`, `soda`, `cheese`, `want`,
+`eat`, `order`, `pay`, `big`, `small`, `restaurant` and eight of ten digits.
 
-The four genuine gaps are odd rather than difficult: ASL-LEX has `hen` and
-`rooster` but no `chicken`, no `nugget` at all, and — strangely — every digit
-except `five` and `ten`. `NUGGET` can be fingerspelled or expressed as
-CHICKEN + SMALL, so realistically this is **three signs to record**, not the
-28 we planned.
+Several signs have multiple variants and therefore more data than the median:
+`sandwich1..4` gives 122 clips, `want1/want2` 61, `eat1/eat2` 63.
 
-> **Verified vs inferred.** The glosses above are *verified* present in
-> ASL-LEX 2.0 (downloaded, checked). That ASL Citizen shares that vocabulary
-> is a strong *inference*: it has 2,731 signs against ASL-LEX's 2,723, and its
-> stated use case is dictionary retrieval. Confirm against ASL Citizen's own
-> label list once Microsoft grants access.
+> **A naming trap worth knowing.** ASL-LEX writes variants as `shake_1`;
+> ASL Citizen writes `shake1`. Matching only the underscore form reported
+> twelve missing signs when the true number was four. `VARIANT_SUFFIX` in
+> `ml/asl/vocabulary.py` handles both.
 
-### ASL Citizen — the dataset itself
-
-**83,399 videos, 2,731 signs, 52 signers** — ten times GISLR's vocabulary.
-
-> **Action item (now):** request ASL Citizen from Microsoft Research and
-> confirm its label list against `ml/asl/vocabulary.py`.
-
-Collected from 52 everyday signers with consent under IRB approval — the most
-ethically careful of the datasets here, which is worth a sentence in the
-report on its own.
-
-Their reported accuracy is **63% top-1, 91% recall@10** on unseen signers.
-That is the honest state of the art on a large vocabulary, and a useful
-corrective to any repo claiming 92% on scraped stock photos.
-
-It ships as video, so using it means running MediaPipe over 83k clips to get
-landmarks — a few hours of compute, entirely doable.
+**Licence: Microsoft Research Licence Terms — non-commercial research use
+only.** Fine for a thesis; state it explicitly, and do not build anything
+commercial on it.
 
 ### WLASL — usable, but read the licence
 
