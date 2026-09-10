@@ -1,0 +1,22 @@
+# Training pipeline. Install into a venv:
+#   python -m venv ml/.venv
+#   ml/.venv/Scripts/python.exe -m pip install -r ml/requirements.txt
+
+numpy>=2.1
+pandas>=2.2          # GISLR parquet index
+pyarrow>=18          # parquet reader
+
+# ASL Citizen ships video; we run MediaPipe over it ourselves, using the same
+# .task model files the browser loads from web/public/models/.
+mediapipe>=1.0
+opencv-python>=4.10
+
+# Dataset download
+kaggle>=1.6
+
+# Tests
+pytest>=8.0
+
+# Model training. Install the CUDA build to match your GPU:
+#   https://pytorch.org/get-started/locally/
+torch>=2.5
