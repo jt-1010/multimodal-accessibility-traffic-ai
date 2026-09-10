@@ -65,6 +65,7 @@ See [docs/development.md](docs/development.md).
 | Doc | What |
 |---|---|
 | [docs/development.md](docs/development.md) | Running it locally |
+| [docs/datasets.md](docs/datasets.md) | **Which sign language datasets exist and which we use** |
 | [docs/training.md](docs/training.md) | **What we train, on what data, with what settings** |
 | [data/menu/README.md](data/menu/README.md) | Where the menu came from, and which numbers are estimates |
 | [docs/spec.md](docs/spec.md) | Full design |
