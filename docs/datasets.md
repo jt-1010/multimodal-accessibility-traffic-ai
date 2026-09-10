@@ -96,9 +96,7 @@ CHICKEN + SMALL, so realistically this is **three signs to record**, not the
 
 ### ASL Citizen — the dataset itself
 
-**2,731 signs.** That is ten times GISLR's vocabulary, and it may well already
-contain `BURGER`, `COMBO`, `LARGE` and the other counter words we were
-planning to record.
+**83,399 videos, 2,731 signs, 52 signers** — ten times GISLR's vocabulary.
 
 > **Action item (now):** request ASL Citizen from Microsoft Research and
 > confirm its label list against `ml/asl/vocabulary.py`.
@@ -142,10 +140,10 @@ a small static model handles quantities cheaply.
 
 1. **GISLR as the base.** Right format, right size, Deaf signers, and a third
    of an ordering vocabulary for free.
-2. **Check ASL Citizen's 2,731 labels next** — every counter word it already
-   covers is one we do not have to record ourselves, recorded by better
-   signers than us.
-3. **Record only the true remainder** with `ml/collect`.
+2. **Request ASL Citizen** — checked, and it covers 41 more of our ordering
+   concepts, signed by 52 consenting signers rather than by us.
+3. **Record only CHICKEN, FIVE and TEN** with `ml/collect`. (NUGGET can be
+   fingerspelled or signed CHICKEN + SMALL.)
 4. **Optionally add a static model** for numbers and fingerspelling.
 
 ## Why this ordering matters for the report
