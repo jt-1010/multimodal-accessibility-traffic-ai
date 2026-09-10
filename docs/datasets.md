@@ -66,15 +66,42 @@ Useful if we ever want to re-extract landmarks with different settings, or
 train on raw video. Their baseline LSTM gets **82.1%** on the 250 signs, which
 is a fair target for our own model.
 
-### ASL Citizen — check this before recording anything ourselves
+### ASL Citizen — checked, and it changes the plan
+
+**Result: 93% of our ordering vocabulary needs no recording by us.**
+
+Run `python ml/asl/vocabulary.py` to reproduce. Of 62 ordering concepts:
+
+| | Count | Source |
+|---|---|---|
+| Already in GISLR | 17 | downloaded, nothing to do |
+| In ASL-LEX (so very likely ASL Citizen) | 41 | request the dataset |
+| **Must record ourselves** | **4** | CHICKEN, NUGGET, FIVE, TEN |
+
+`BURGER` is in there as `hamburger`, along with `coffee`, `soda`, `cheese`,
+`want`, `more`, `eat`, `order`, `pay`, `large` (as `big`), `small`, and eight
+of the ten digits.
+
+The four genuine gaps are odd rather than difficult: ASL-LEX has `hen` and
+`rooster` but no `chicken`, no `nugget` at all, and — strangely — every digit
+except `five` and `ten`. `NUGGET` can be fingerspelled or expressed as
+CHICKEN + SMALL, so realistically this is **three signs to record**, not the
+28 we planned.
+
+> **Verified vs inferred.** The glosses above are *verified* present in
+> ASL-LEX 2.0 (downloaded, checked). That ASL Citizen shares that vocabulary
+> is a strong *inference*: it has 2,731 signs against ASL-LEX's 2,723, and its
+> stated use case is dictionary retrieval. Confirm against ASL Citizen's own
+> label list once Microsoft grants access.
+
+### ASL Citizen — the dataset itself
 
 **2,731 signs.** That is ten times GISLR's vocabulary, and it may well already
 contain `BURGER`, `COMBO`, `LARGE` and the other counter words we were
 planning to record.
 
-> **Action item:** get the ASL Citizen label list and intersect it with our
-> ~28 counter signs. Every match is a sign we do not have to record, from
-> fluent signers rather than from us.
+> **Action item (now):** request ASL Citizen from Microsoft Research and
+> confirm its label list against `ml/asl/vocabulary.py`.
 
 Collected from 52 everyday signers with consent under IRB approval — the most
 ethically careful of the datasets here, which is worth a sentence in the
