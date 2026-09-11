@@ -349,6 +349,17 @@ def prepare_citizen(limit: int | None, signs: set[str] | None) -> None:
         sys.exit("No rows matched. Check --signs against the gloss column.")
 
     print(f"  preparing {len(rows)} clips")
+
+    # Index every video once. The previous version called rglob() per clip,
+    # which walks all 83,399 files to find one of them -- fine for a smoke
+    # test, quadratic for a real run, and the dominant cost by far. MediaPipe
+    # takes ~2.5s per clip; the lookup was taking longer than that.
+    print("  indexing video files...")
+    by_name = {p.name: p for p in (ASL_CITIZEN_ROOT / "videos").rglob("*.mp4")}
+    if not by_name:
+        by_name = {p.name: p for p in ASL_CITIZEN_ROOT.rglob("*.mp4")}
+    print(f"  indexed {len(by_name)} videos")
+
     extractor = make_extractor()
 
     X, y, signers, skipped = [], [], [], 0
@@ -361,12 +372,12 @@ def prepare_citizen(limit: int | None, signs: set[str] | None) -> None:
             skipped += 1
             continue
 
-        matches = list(ASL_CITIZEN_ROOT.rglob(Path(rel).name))
-        if not matches:
+        video = by_name.get(Path(rel).name)
+        if video is None:
             skipped += 1
             continue
 
-        seq = video_to_array(matches[0], extractor)
+        seq = video_to_array(video, extractor)
         if seq is None or len(seq) < 2:
             skipped += 1
             continue
@@ -377,8 +388,8 @@ def prepare_citizen(limit: int | None, signs: set[str] | None) -> None:
         # present, else the filename stem, so the split can still group by clip.
         signers.append(str(field(r, "participant id", "participant_id", "signer") or Path(rel).stem))
 
-        if i % 25 == 0:
-            print(f"  {i}/{len(rows)} ({skipped} skipped)")
+        if i % 20 == 0:
+            print(f"  {i}/{len(rows)} ({skipped} skipped)", flush=True)
 
     if not X:
         sys.exit("Nothing prepared from ASL Citizen.")
