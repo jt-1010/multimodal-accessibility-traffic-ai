@@ -186,21 +186,25 @@ def video_to_array(video_path: Path, extractor) -> np.ndarray | None:
 
     cap = cv2.VideoCapture(str(video_path))
     fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    step_ms = max(1, int(1000 / fps))
     out = []
-    n = 0
     try:
         while True:
             ok, frame = cap.read()
             if not ok:
                 break
-            # VIDEO running mode requires strictly increasing timestamps; it
-            # uses them for temporal smoothing between frames.
-            vec = extractor(frame, int(n * 1000 / fps))
-            n += 1
+            # The extractor owns the clock. MediaPipe's VIDEO mode requires
+            # timestamps that increase across the landmarker's whole lifetime,
+            # not per clip -- and we reuse one landmarker across every video
+            # because loading the models takes seconds. Passing each clip's own
+            # timestamps starting at zero throws on the second clip.
+            vec = extractor(frame, step_ms)
             if vec is not None:
                 out.append(normalize_frame(vec))
     finally:
         cap.release()
+
+    extractor.next_clip()
 
     if not out:
         return None
@@ -246,7 +250,13 @@ def make_extractor():
     poses = pose_indices()
     empty_hand = [0.0] * (N_HAND_POINTS * DIMS)
 
-    def extract(bgr, timestamp_ms: int) -> np.ndarray | None:
+    # Monotonic across every clip this extractor ever sees. See video_to_array.
+    clock = {"ms": 0}
+
+    def extract(bgr, step_ms: int) -> np.ndarray | None:
+        clock["ms"] += step_ms
+        timestamp_ms = clock["ms"]
+
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         image = mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb)
 
@@ -280,10 +290,20 @@ def make_extractor():
         vec = np.asarray(left + right + body, dtype=np.float32)
         return vec if len(vec) == feature_length() else None
 
+    def next_clip():
+        """Jump the clock forward so clips never blur into one another.
+
+        A full second of gap: MediaPipe smooths between adjacent frames, and
+        without a break the last frame of one signer would inform the first
+        frame of the next.
+        """
+        clock["ms"] += 1000
+
     def close():
         hands.close()
         pose.close()
 
+    extract.next_clip = next_clip  # type: ignore[attr-defined]
     extract.close = close  # type: ignore[attr-defined]
     return extract
 
