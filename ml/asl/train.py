@@ -79,6 +79,55 @@ def split_by_signer(signers: np.ndarray, y: np.ndarray, val_frac: float, seed: i
     return train_idx, val_idx
 
 
+def load_backbone(model, checkpoint: Path, device) -> "torch.nn.Module":
+    """Load a pretrained model's weights, except the classification head.
+
+    Pretraining happens on the full 2,731-sign corpus; fine-tuning happens on
+    our ~58. The two models differ only in the final Linear layer, so every
+    other tensor transfers. Dropping head.* by name rather than by
+    strict=False is deliberate: a silent shape mismatch anywhere else would
+    otherwise be swallowed, and a backbone that failed to load looks exactly
+    like a backbone that loaded and did not help.
+    """
+    if not checkpoint.exists():
+        sys.exit(f"No checkpoint at {checkpoint}")
+
+    ckpt = torch.load(checkpoint, map_location=device, weights_only=False)
+    src = ckpt["state_dict"]
+    dst = model.state_dict()
+
+    transferred, skipped = [], []
+    for k, v in src.items():
+        if k.startswith("head."):
+            skipped.append(k)
+        elif k in dst and dst[k].shape == v.shape:
+            dst[k] = v
+            transferred.append(k)
+        else:
+            skipped.append(k)
+
+    if not transferred:
+        sys.exit(f"Nothing transferred from {checkpoint}. Architecture mismatch?")
+
+    model.load_state_dict(dst)
+    print(f"  loaded backbone from {checkpoint.name}: "
+          f"{len(transferred)} tensors transferred, {len(skipped)} skipped "
+          f"({len(ckpt['labels'])} -> {model.head.out_features} classes)")
+    return model
+
+
+def set_backbone_trainable(model, trainable: bool) -> None:
+    """Freeze everything but the head.
+
+    With ~31 clips per class, letting the whole network move immediately would
+    undo the pretraining before the randomly-initialised head has learned
+    anything useful. Train the head first, then release the rest.
+    """
+    for name, param in model.named_parameters():
+        if not name.startswith("head."):
+            param.requires_grad = trainable
+
+
 def augment(batch: torch.Tensor) -> torch.Tensor:
     """Cheap, label-preserving jitter.
 
@@ -118,7 +167,15 @@ def run(args) -> None:
     val_dl = DataLoader(val_ds, batch_size=args.batch)
 
     model = build(len(labels), in_dim=X.shape[2], frames=X.shape[1]).to(device)
-    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
+
+    if args.init_from:
+        model = load_backbone(model, Path(args.init_from), device)
+        if args.freeze_epochs > 0:
+            set_backbone_trainable(model, False)
+            print(f"  backbone frozen for the first {args.freeze_epochs} epochs")
+    opt = torch.optim.AdamW(
+        [p for p in model.parameters() if p.requires_grad], lr=args.lr, weight_decay=0.01
+    )
     sched = torch.optim.lr_scheduler.OneCycleLR(
         opt, max_lr=args.lr, total_steps=args.epochs * max(1, len(train_dl)), pct_start=0.2
     )
@@ -130,6 +187,10 @@ def run(args) -> None:
     ARTIFACTS.mkdir(parents=True, exist_ok=True)
 
     for epoch in range(1, args.epochs + 1):
+        if args.init_from and args.freeze_epochs > 0 and epoch == args.freeze_epochs + 1:
+            set_backbone_trainable(model, True)
+            print(f"  epoch {epoch}: backbone unfrozen")
+
         model.train()
         total_loss = 0.0
         for xb, yb in train_dl:
@@ -175,10 +236,10 @@ def run(args) -> None:
         model.load_state_dict(best_state)
     torch.save({"state_dict": model.state_dict(), "labels": labels,
                 "in_dim": X.shape[2], "frames": X.shape[1]},
-               ARTIFACTS / "sign_classifier.pt")
+               ARTIFACTS / f"{args.out}.pt")
     with (ARTIFACTS / "labels.json").open("w", encoding="utf-8") as f:
         json.dump(labels, f, indent=2)
-    print(f"Wrote {ARTIFACTS / 'sign_classifier.pt'}")
+    print(f"Wrote {ARTIFACTS / (args.out + '.pt')}")
     print("Next: python ml/asl/export.py")
 
 
@@ -191,6 +252,11 @@ def main() -> None:
     ap.add_argument("--val-frac", type=float, default=0.2)
     ap.add_argument("--patience", type=int, default=15)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--init-from", help="checkpoint to load a pretrained backbone from")
+    ap.add_argument("--freeze-epochs", type=int, default=0,
+                    help="train only the head for this many epochs first")
+    ap.add_argument("--out", default="sign_classifier",
+                    help="artifact basename, e.g. pretrained")
     args = ap.parse_args()
 
     torch.manual_seed(args.seed)
