@@ -46,9 +46,11 @@ def main() -> None:
     ap.add_argument("--val-frac", type=float, default=0.2)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--worst", type=int, default=12, help="how many worst classes to list")
+    ap.add_argument("--merge-variants", action="store_true",
+                    help="must match how the checkpoint was trained")
     args = ap.parse_args()
 
-    X, y, signers, labels = load(args.data)
+    X, y, signers, labels = load(args.data, merge=args.merge_variants)
     ckpt_path = ARTIFACTS / f"{args.checkpoint}.pt"
     if not ckpt_path.exists():
         sys.exit(f"No checkpoint at {ckpt_path}")

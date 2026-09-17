@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -31,12 +32,45 @@ from config import ARTIFACTS, PREPARED  # noqa: E402
 from model import build  # noqa: E402
 
 
-def load(name: str):
+#: ASL Citizen labels regional/stylistic variants separately: eat1 and eat2,
+#: want1 and want2. They are different ways of producing the SAME sign.
+VARIANT_SUFFIX = re.compile(r"_?\d+$")
+
+
+def merge_variants(y: np.ndarray, labels: list[str]) -> tuple[np.ndarray, list[str]]:
+    """Collapse sign variants into one class each.
+
+    Worth doing for three separate reasons, all pulling the same way:
+
+    1. Distinguishing eat1 from eat2 is not a task we want. Both mean EAT, and
+       the terminal does the same thing either way -- so the model was being
+       penalised for answers that were, for our purposes, correct. Measured:
+       30% of its errors were variant confusions.
+    2. It doubles the data for merged classes. eat1 + eat2 is 63 clips rather
+       than two classes of 31 -- and scarcity per class is this model's binding
+       constraint.
+    3. It shrinks the problem from 84 classes to 64.
+
+    Anything that wants the finer distinction back can train without this.
+    """
+    bases = [VARIANT_SUFFIX.sub("", l) for l in labels]
+    new_labels = sorted(set(bases))
+    remap = {i: new_labels.index(bases[i]) for i in range(len(labels))}
+    return np.array([remap[int(v)] for v in y], dtype=np.int64), new_labels
+
+
+def load(name: str, merge: bool = False):
     X = np.load(PREPARED / f"{name}_X.npy")
     y = np.load(PREPARED / f"{name}_y.npy")
     signers = np.load(PREPARED / f"{name}_signers.npy")
     with (PREPARED / f"{name}_labels.json").open(encoding="utf-8") as f:
         labels = json.load(f)
+
+    if merge:
+        before = len(labels)
+        y, labels = merge_variants(y, labels)
+        print(f"  merged sign variants: {before} -> {len(labels)} classes")
+
     return X, y, signers, labels
 
 
@@ -147,7 +181,7 @@ def augment(batch: torch.Tensor) -> torch.Tensor:
 
 
 def run(args) -> None:
-    X, y, signers, labels = load(args.data)
+    X, y, signers, labels = load(args.data, merge=args.merge_variants)
     print(f"{args.data}: {X.shape[0]} clips, {len(labels)} classes, {len(np.unique(signers))} signers")
 
     counts = np.bincount(y, minlength=len(labels))
@@ -252,6 +286,8 @@ def main() -> None:
     ap.add_argument("--val-frac", type=float, default=0.2)
     ap.add_argument("--patience", type=int, default=15)
     ap.add_argument("--seed", type=int, default=0)
+    ap.add_argument("--merge-variants", action="store_true",
+                    help="treat eat1/eat2 as one sign (recommended)")
     ap.add_argument("--init-from", help="checkpoint to load a pretrained backbone from")
     ap.add_argument("--freeze-epochs", type=int, default=0,
                     help="train only the head for this many epochs first")

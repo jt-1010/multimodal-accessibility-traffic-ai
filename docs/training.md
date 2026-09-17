@@ -320,6 +320,70 @@ using word overlap plus character trigrams, with four tests covering it, and
 it needs no model. If it later proves too crude, the upgrade is sentence
 embeddings over item names — still not images.
 
+## Results so far (2026-09-17)
+
+Trained on ASL Citizen landmarks, **signer-independent** split throughout —
+16 of 49 signers held out entirely, never seen in training.
+
+| Run | Classes | Clips | top-1 | top-5 |
+|---|---|---|---|---|
+| First model | 12 | 369 | 0.863 | — |
+| Full vocabulary | 84 | 2,580 | 0.835 | 0.932 |
+| **Variants merged** | **64** | **2,580** | **0.886** | **0.951** |
+
+Random guess on 64 classes is 0.016, so 0.886 is ~55x chance.
+
+For context: PopSign's LSTM baseline reports 0.821 over 250 signs, and ASL
+Citizen's own paper 0.63 over 2,731. Ours is an easier problem than either —
+64 classes — so do not read it as beating them.
+
+### Merging sign variants was worth ~5 points
+
+ASL Citizen labels regional and stylistic variants separately: `eat1`/`eat2`,
+`want1`/`want2`. They are the same sign produced differently, and the terminal
+does the same thing either way — so the 84-class model was being marked wrong
+for answers that were, for our purposes, right. **30% of its errors were
+variant confusions.**
+
+Merging helps three ways at once: it removes a distinction we never wanted, it
+doubles the data for merged classes (eat1 + eat2 = 63 clips, not two classes
+of 31), and it shrinks the problem from 84 classes to 64.
+
+> **A measurement trap worth recording.** The first merged run scored 0.806 —
+> *worse* than the unmerged 0.835 — and looked like evidence against merging.
+> It had early-stopped at epoch 70 against the unmerged run's 112. With
+> patience raised from 15 to 30 it reached 0.886. This training is noisy
+> enough that an aggressive patience reads as a result. Do not compare runs
+> that stopped at different epochs.
+
+### Known weaknesses
+
+**Per-signer spread is 0.33** — from 0.67 (P28) to 1.00. The model works
+materially better for some people than others. Report this as a fairness
+finding; it is exactly the failure mode that matters for the users this is
+built for, and averaging hides it.
+
+**The confidence gate barely works.** Softmax separates right from wrong by
+only +0.264, so the segmenter's 0.6 threshold passes most predictions and
+blocks a minority of errors. The top1−top2 margin separates better (+0.335)
+and should replace it.
+
+**Weakest signs**: `spicy`→napkin (0.50), `fry`→bag (0.57), `fish`→cup (0.62).
+23 of 64 classes are at 100% recall.
+
+### Extraction cost, measured
+
+| | |
+|---|---|
+| Single process | 0.41 clips/s |
+| 14 workers | 0.70 clips/s — only **1.7x** |
+
+MediaPipe runs TFLite with an XNNPACK delegate that spawns a thread pool per
+process, so 14 processes on 16 cores mostly context-switch. Workers now pin
+themselves to one thread before the native libraries load; that fix is **not
+yet measured**. At 0.70 clips/s the full 2,731-sign corpus is ~33 hours, so
+pretraining on all of it is only worth it if the thread fix lands.
+
 ## What we deliberately do not train
 
 **MediaPipe pose and hand landmarkers.** Pretrained, used as-is. Re-training
