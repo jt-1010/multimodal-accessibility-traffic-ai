@@ -8,6 +8,17 @@ data/menu/fastfood_nutrition.csv
 *.pt
 *.pth
 *.onnx
+
+# ...except the two files the inference service actually loads. Committing a
+# 5MB model is a deliberate trade: reproducing it otherwise means a 46GB
+# download, 72 minutes of MediaPipe, and a training run, which is too high a
+# bar for a teammate who just wants to see the demo work after a clone.
+#
+# The cost is that every committed model stays in git history forever. So
+# commit a model when it is worth keeping, not after every experiment. The
+# .pt checkpoints stay ignored -- they are only needed to resume training.
+!ml/asl/artifacts/sign_classifier.onnx
+!ml/asl/artifacts/labels.json
 *.gguf
 *.tflite
 *.safetensors
